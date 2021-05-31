@@ -7,4 +7,5 @@
 
 ---
 
-You will need to download Chromedriver.exe and put it in the same path as SGD.py script
+## PRE-REQUISITES
+1. You will need to download Chromedriver.exe and put it in the same path as SGD.py script
