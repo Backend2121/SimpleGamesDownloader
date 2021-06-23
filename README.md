@@ -5,6 +5,10 @@
 
 [nxbrew.com](nxbrew.com) is a website, accessible only using a proxy, where the majority of games for the Nintendo Switch are stored, this script will ask you for the game to be searched in the aformentioned website then tunnel your request through [hide.me](hide.me) providing you with the final download link skipping all those filthy scam pages and pop-up tabs.
 
+## Discord Server
+Join the Discord Server for questions, suggesting ideas/features and also to chill a bit.
+https://discord.gg/WTrCtvyPke
+
 ---
 
 ## PRE-REQUISITES
