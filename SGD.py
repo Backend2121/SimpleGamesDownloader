@@ -123,20 +123,7 @@ def main():
     
     # Get download links
     # Ask the user the number corresponding to the desired download link
-    # Currently lists only the first result found
     downloadLinks = scrape(browser.page_source)
-    #downloadLinks = browser.find_element_by_xpath("/html/body/div[5]/div/div/div/div[3]/div/div/article/div[4]")
-    #downloadLinks = downloadLinks.find_elements_by_class_name("wp-block-columns has-2-columns")
-
-    #for k,v in enumerate(downloadLinks):
-    #    link = v.find_element_by_css_selector("a").get_attribute("href")
-    #    if (link != None and "[Decrypt Here]" not in v.text):
-    #        # Get internal link poisoned by Hide.me
-    #        print(str(k) + ": " + v.text + " \nInternal Link: " + link + "\n")
-    #        poisonedLinks.append(link)
-    #    else:
-            # Used only in Base64 Encoded links TODO Date: TBD
-    #        print("ERROR: BASE 64 DECODING NOT YET IMPLEMENTED \n" + v.text)
     # If only 1 result is found, proceed automatically
     if (len(downloadLinks) == 1):
         choice = 0
