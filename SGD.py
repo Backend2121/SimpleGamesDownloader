@@ -1,5 +1,4 @@
 import os
-from bs4 import BeautifulSoup
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -9,7 +8,6 @@ if (os.system("pip -V") != 0):
 
 # Check if Selenium is already installed if not install 
 try:
-    
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
 except ModuleNotFoundError:
