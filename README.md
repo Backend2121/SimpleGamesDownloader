@@ -7,5 +7,12 @@
 
 ---
 
+## Discord Server
+Join the Discord Server for questions, suggesting ideas/features and also to chill a bit.  
+https://discord.gg/WTrCtvyPke
+
+---
+
 ## PRE-REQUISITES
-1. You will need to download Chromedriver.exe and put it in the same path as SGD.py script
+1. You need to have Chrome installed
+2. You will need to download Chromedriver.exe and put it in the same path as SGD.py script (Make sure the ChromeDriver version is the same as the Chrome browser version you have)
