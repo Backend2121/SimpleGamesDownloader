@@ -1,4 +1,5 @@
 import os
+from bs4 import BeautifulSoup
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -8,16 +9,28 @@ if (os.system("pip -V") != 0):
 
 # Check if Selenium is already installed if not install 
 try:
+    
     from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
 except ModuleNotFoundError:
+    print("WARNING: Selenium not installed, installing...")
     os.system("pip install selenium")
-from selenium.webdriver.chrome.options import Options
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+
+# Check if BeautifulSoup4 is already installed if not install
+try:
+    from bs4 import BeautifulSoup
+except ModuleNotFoundError:
+    print("WARNING: BeautifulSoup4 not installed, installing...")
+    os.system("pip install beautifulsoup4")
+    from bs4 import BeautifulSoup
 
 proxy = "https://hide.me/it/proxy"
 # Results of the nxbrew search
 links = []
 # Contains hrefs poisoned by hide.me
-poisonedLinks = []
+downloadLinks = []
 # Chrome headless and silent options
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -27,7 +40,10 @@ chrome_options.add_argument('log-level=3')
 class driver():
     # General class of the browser
     def __init__(self):
-        self.Driver = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+        try:
+            self.Driver = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+        except:
+            print("ERROR: Webdriver not found, please make sure you have it inside this script's folder!")
 
 def Proxy(input, URL):
     # Navigate hide.me
@@ -39,18 +55,18 @@ def Proxy(input, URL):
 def prettifyOutput(link):
     # Give advice on how to use the obtained information
     if ("magnet:?" in link):
-        print("\nThis looks like a Torrent Magnet URL, open it up with Torrent!:\n" + link)
+        print("\nThis looks like a Torrent Magnet URL, open it up with a Torrent client!:\n" + link)
     else:
         print("\nThis looks like a normal URl, open it up on the browser!:\n" + link)
 
 def CleanLink(userInput):
     # User error checking
-    while (int(userInput) > len(poisonedLinks) - 1) or int(userInput) < 0:
+    while (int(userInput) > len(downloadLinks) - 1) or int(userInput) < 0:
         print("Invalid number\n")
-        userInput = input("Which link you want do open? [0 - " + str(len(poisonedLinks)-1) + "]")
+        userInput = input("Which link you want do open? [0 - " + str(len(downloadLinks)-1) + "]")
     
     # Link skippin'
-    browser.get(poisonedLinks[int(userInput)])
+    browser.get("https://nl.hideproxy.me" + downloadLinks[int(userInput)])
     downloadLink = browser.find_element_by_xpath("/html/body/header/div/div/div/div[1]/a").get_attribute("href")
     browser.get(downloadLink)
     unpoisonedLink = browser.find_element_by_xpath('/html/body/div[1]/form/div/input').get_attribute("value")
@@ -61,6 +77,24 @@ def listGames(list):
     for k,v in enumerate(list):
         print(str(k) + ": " + v.text + "\n")
 
+def scrape(htmlPage):
+    #Step by step garbage cleaning of html page with BS4
+    soup = BeautifulSoup(htmlPage, 'html.parser')
+    n = 0
+    for bigDiv in soup.find_all("div", class_="wp-block-columns has-2-columns"):
+        for div in bigDiv.find_all("div", class_="wp-block-column"):
+            for p in div.find_all("p"):
+                #Get download name
+                try:
+                    print(p.find("strong").get_text(), end=":\n")
+                except:
+                    pass
+                for a in p.find_all("a"):
+                    print(a.get_text() + " " + a.get("href") + " [" + str(n) + "]")
+                    downloadLinks.append(a.get("href"))
+                    n = n + 1
+    return downloadLinks
+    
 def main():
     # Tunnel with Proxy
     browser.get(proxy)
@@ -91,20 +125,25 @@ def main():
     
     # Get download links
     # Ask the user the number corresponding to the desired download link
-    downloadLinks = browser.find_element_by_xpath("/html/body/div[5]/div/div/div/div[3]/div/div/article/div[4]/div[3]/div[2]")
-    downloadList = downloadLinks.find_elements_by_css_selector("p")
-    for k,v in enumerate(downloadList):
-        if (v.find_element_by_css_selector("a").get_attribute("href") != None and "[Decrypt Here]" not in v.text):
-            # Get internal link poisoned by Hide.me
-            print(str(k) + ": " + v.text + " \nInternal Link: " + v.find_element_by_css_selector("a").get_attribute("href") + "\n")
-            poisonedLinks.append(v.find_element_by_css_selector("a").get_attribute("href"))
-        else:
+    # Currently lists only the first result found
+    downloadLinks = scrape(browser.page_source)
+    #downloadLinks = browser.find_element_by_xpath("/html/body/div[5]/div/div/div/div[3]/div/div/article/div[4]")
+    #downloadLinks = downloadLinks.find_elements_by_class_name("wp-block-columns has-2-columns")
+
+    #for k,v in enumerate(downloadLinks):
+    #    link = v.find_element_by_css_selector("a").get_attribute("href")
+    #    if (link != None and "[Decrypt Here]" not in v.text):
+    #        # Get internal link poisoned by Hide.me
+    #        print(str(k) + ": " + v.text + " \nInternal Link: " + link + "\n")
+    #        poisonedLinks.append(link)
+    #    else:
             # Used only in Base64 Encoded links TODO Date: TBD
-            print("ERROR: BASE 64 DECODING NOT YET IMPLEMENTED \n" + v.text)
-    if (len(poisonedLinks) == 1):
+    #        print("ERROR: BASE 64 DECODING NOT YET IMPLEMENTED \n" + v.text)
+    # If only 1 result is found, proceed automatically
+    if (len(downloadLinks) == 1):
         choice = 0
     else:
-        choice = input("Which link you want do open? [0 - " + str(len(poisonedLinks)-1) + "]")
+        choice = input("Which link you want do open? [0 - " + str(len(downloadLinks)-1) + "]")
 
     # Skippin' link shortners
     CleanLink(choice)
@@ -128,3 +167,4 @@ if __name__ == '__main__':
     # Start
     browser = driver().Driver
     main()
+    exit()
