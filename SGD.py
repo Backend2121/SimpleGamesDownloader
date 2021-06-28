@@ -1,4 +1,5 @@
 import os
+from Prettifier import *
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -41,7 +42,7 @@ class driver():
         try:
             self.Driver = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
         except:
-            print("ERROR: Webdriver not found, please make sure you have it inside this script's folder!")
+            Error("Webdriver not found, please make sure you have it inside this script's folder!")
 
 def Proxy(input, URL):
     # Navigate hide.me
@@ -53,14 +54,14 @@ def Proxy(input, URL):
 def prettifyOutput(link):
     # Give advice on how to use the obtained information
     if ("magnet:?" in link):
-        print("\nThis looks like a Torrent Magnet URL, open it up with a Torrent client!:\n" + link)
+        Info("\nThis looks like a Torrent Magnet URL, open it up with a Torrent client!:\n" + link)
     else:
-        print("\nThis looks like a normal URl, open it up on the browser!:\n" + link)
+        Info("\nThis looks like a normal URl, open it up on the browser!:\n" + link)
 
 def CleanLink(userInput):
     # User error checking
     while (int(userInput) > len(downloadLinks) - 1) or int(userInput) < 0:
-        print("Invalid number\n")
+        Warning("Invalid number\n")
         userInput = input("Which link you want do open? [0 - " + str(len(downloadLinks)-1) + "]")
     
     # Link skippin'
@@ -84,7 +85,7 @@ def scrape(htmlPage):
             for p in div.find_all("p"):
                 #Get download name
                 try:
-                    print(p.find("strong").get_text(), end=":\n")
+                    Game(p.find("strong").get_text())
                 except:
                     pass
                 for a in p.find_all("a"):
