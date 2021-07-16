@@ -26,4 +26,5 @@ https://discord.gg/WTrCtvyPke
 * Ads skipping
 * Proxyed requests
 * Direct game/update/DLC download link
+* Update notifier
 * Themes
