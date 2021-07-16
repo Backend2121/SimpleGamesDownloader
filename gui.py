@@ -38,6 +38,8 @@ class App():
         message = QMessageBox()
         message.setWindowTitle(title)
         message.setText(label)
+        # Icon of widget
+        self.message.setWindowIcon(QIcon("Icons\\Switch.png"))
 
         # Set style
         message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
