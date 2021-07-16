@@ -1,0 +1,51 @@
+QListWidget {
+    border: rgb(100, 100, 100);
+    border: 20px, rgb(100, 100, 100);
+    border-radius: 10px;
+    background-color: rgb(39, 66, 66);
+}
+QLineEdit {
+    border: 20px rgb(100, 100, 100);
+    border-radius: 10px;
+    background-color: rgb(39, 66, 66);
+}
+.QWidget {
+    background-color: rgb(47, 79, 79);
+}
+.QDialog {
+    background-color: rgb(47, 79, 79);
+    color: cornsilk;
+}
+QMenuBar {
+    background-color: rgb(47, 79, 79);
+    color: #000;
+}
+QMenuBar::item {
+    background-color: rgb(47, 79, 79);
+    color: #000;
+}
+QMenuBar::item::selected {
+    background-color: rgb(39, 66, 66);
+    color: #000;
+}
+QMenu {
+    background-color: rgb(47, 79, 79);
+    color: #000;
+}
+QMenu::item::selected {
+    background-color: rgb(39, 66, 66);
+    color: #111;
+}
+QComboBox {
+    background-color: rgb(39, 66, 66);
+}
+QComboBox QAbstractItemView {
+    background-color: rgb(39, 66, 66);
+}
+QPushButton {
+    background-color: rgb(39, 66, 66);
+}
+QMessageBox {
+    background-color: rgb(39, 66, 66);
+    color: cornsilk;
+}

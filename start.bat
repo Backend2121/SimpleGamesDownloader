@@ -1,1 +1,1 @@
-python SGD.py
+python gui.py

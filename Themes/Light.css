@@ -1,0 +1,27 @@
+QMenuBar {
+    background-color: rgb(216, 216, 216);
+    color: #000;
+}
+QMenuBar::item {
+    background-color: rgb(216, 216, 216);
+    color: #000;
+}
+QMenuBar::item::selected {
+    background-color: rgb(226, 226, 226);
+    color: #000;
+}
+QMenu {
+    background-color: rgb(216, 216, 216);
+    color: #000;
+}
+QMenu::item::selected {
+    background-color: rgb(226, 226, 226);
+    color: #111;
+}
+.QWidget {
+    background-color: rgb(216, 216, 216);
+}
+.QDialog {
+    background-color: rgb(216, 216, 216);
+    color: cornsilk;
+}

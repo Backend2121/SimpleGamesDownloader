@@ -1,4 +1,5 @@
 import os
+from sys import implementation
 from Prettifier import *
 
 # Check if pip exists if not install
@@ -6,6 +7,14 @@ if (os.system("pip -V") != 0):
     os.system("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py")
     os.system("python get-pip.py")
     os.remove("get-pip.py")
+
+# Check if Pillow is already installed if not install 
+try:
+    from PIL import Image
+except ModuleNotFoundError:
+    print("WARNING: Pillow not installed, installing...")
+    os.system("pip install Pillow")
+    from PIL import Image
 
 # Check if Selenium is already installed if not install 
 try:
@@ -26,131 +35,153 @@ except ModuleNotFoundError:
     from bs4 import BeautifulSoup
 
 proxy = "https://hide.me/it/proxy"
-# Results of the nxbrew search
-links = []
-# Contains hrefs poisoned by hide.me
-downloadLinks = []
 # Chrome headless and silent options
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 chrome_options.add_argument("--headless")
 chrome_options.add_argument('log-level=3')
 
-class driver():
-    # General class of the browser
+class SGD():
+    """Switch Games Downloader main class"""
     def __init__(self):
+        """Instantiate the Selenium browser, used throughout the entire process"""
         try:
-            self.Driver = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
         except:
-            Error("Webdriver not found, please make sure you have it inside this script's folder!")
-
-def Proxy(input, URL):
-    # Navigate hide.me
-    input.click()
-    input.clear()
-    input.send_keys(URL)
-    input.submit()
-
-def prettifyOutput(link):
-    # Give advice on how to use the obtained information
-    if ("magnet:?" in link):
-        Info("\nThis looks like a Torrent Magnet URL, open it up with a Torrent client!:\n" + link)
-    else:
-        Info("\nThis looks like a normal URl, open it up on the browser!:\n" + link)
-
-def CleanLink(userInput):
-    # User error checking
-    while (int(userInput) > len(downloadLinks) - 1) or int(userInput) < 0:
-        Warning("Invalid number\n")
-        userInput = input("Which link you want do open? [0 - " + str(len(downloadLinks)-1) + "]")
+            Error("Webdriver not found, please make sure you have it inside this script's folder!") 
     
-    # Link skippin'
-    browser.get("https://nl.hideproxy.me" + downloadLinks[int(userInput)])
-    downloadLink = browser.find_element_by_xpath("/html/body/header/div/div/div/div[1]/a").get_attribute("href")
-    browser.get(downloadLink)
-    unpoisonedLink = browser.find_element_by_xpath('/html/body/div[1]/form/div/input').get_attribute("value")
-    browser.get(unpoisonedLink)
+    def Proxy(self, input, URL):
+        # Navigate hide.me
+        input.click()
+        input.clear()
+        input.send_keys(URL)
+        input.submit()
 
-def listGames(list):
-    # Print out all results found during search
-    for k,v in enumerate(list):
-        print(str(k) + ": " + v.text + "\n")
+    def CleanLink(self, userInput):
+        """Final step: Unpoison download link"""
+        # User error checking
+        if "/go.php" not in userInput:
+            return
+        
+        # Link skippin'
+        userInput = userInput[userInput.find("/go.php"):]
+        self.browser.get("https://nl.hideproxy.me" + userInput)
+        downloadLink = self.browser.find_element_by_xpath("/html/body/header/div/div/div/div[1]/a").get_attribute("href")
+        self.browser.get(downloadLink)
+        unpoisonedLink = self.browser.find_element_by_xpath('/html/body/div[1]/form/div/input').get_attribute("value")
+        self.browser.get(unpoisonedLink)
+        
+        # Bypass fake robot check by insta-killing javascript with 4 ESCAPE inputs
+        for x in range(0, 4):
+            self.browser.execute_script("window.stop();")
 
-def scrape(htmlPage):
-    #Step by step garbage cleaning of html page with BS4
-    soup = BeautifulSoup(htmlPage, 'html.parser')
-    n = 0
-    for bigDiv in soup.find_all("div", class_="wp-block-columns has-2-columns"):
-        for div in bigDiv.find_all("div", class_="wp-block-column"):
-            for p in div.find_all("p"):
-                #Get download name
-                try:
-                    Game(p.find("strong").get_text())
-                except:
-                    pass
-                for a in p.find_all("a"):
-                    print(a.get_text() + " " + a.get("href") + " [" + str(n) + "]")
-                    downloadLinks.append(a.get("href"))
-                    n = n + 1
-    return downloadLinks
-    
-def main():
-    # Tunnel with Proxy
-    browser.get(proxy)
-    inputBox = browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
-    toSearch = input("Type here the game you want to search for: ")
-    url = "https://nxbrew.com/search/"+toSearch+"/"
-    Proxy(inputBox, url)
+        # Wait for 3 seconds to end with while loop
+        finalLink = self.browser.find_element_by_xpath("/html/body/div[1]/div/div/section/div/div/div/div/div[3]/a").get_attribute("href")
+        while "javascript" in finalLink:
+            finalLink = self.browser.find_element_by_xpath("/html/body/div[1]/div/div/section/div/div/div/div/div[3]/a").get_attribute("href")
+        
+        return finalLink
 
-    # Index all results of the search specified in url -> toSearch
-    # Ask the user the number corresponding to the desired game
-    posts = browser.find_elements_by_class_name("post-title")
-    for post in posts:
-        links.append(post.find_element_by_xpath(".//*").get_attribute("href"))
-    
-    # Check for no results
-    if len(links) == 0:
-        print("\nNo results found!")
-        browser.close()
-        return
+    def scrape(self, htmlPage):
+        """Find all link available for a certain title"""
+        # Contains hrefs poisoned by hide.me
+        self.downloadLinks = []
+        self.downloadLabels = []
+        #Step by step garbage cleaning of html page with BS4
+        soup = BeautifulSoup(htmlPage, 'html.parser')
+        for bigDiv in soup.find_all("div", class_="wp-block-columns has-2-columns"):
+            for div in bigDiv.find_all("div", class_="wp-block-column"):
+                for p in div.find_all("p"):
+                    # Get download name
+                    try:
+                        self.downloadLinks.append(p.find("strong").get_text())
+                        self.downloadLabels.append("- ")
+                    except:
+                        pass
+                    # Get download name + link
+                    for a in p.find_all("a"):
+                        self.downloadLinks.append(a.get("href"))
+                        self.downloadLabels.append(a.get_text())
+        return (self.downloadLinks, self.downloadLabels)
 
-    # Clean user input for game selection
-    listGames(posts)
-    choice = input("Choose which one you want to download [0 - "+str(len(links)-1)+"]: ")
-    while (int(choice) > len(links) - 1) or int(choice) < 0:
-        print("Invalid number\n")
-        choice = input("Which link you want do open? [0 - " + str(len(links)-1) + "]")
-    browser.get(links[int(choice)])
-    
-    # Get download links
-    # Ask the user the number corresponding to the desired download link
-    downloadLinks = scrape(browser.page_source)
-    # If only 1 result is found, proceed automatically
-    if (len(downloadLinks) == 1):
-        choice = 0
-    else:
-        choice = input("Which link you want do open? [0 - " + str(len(downloadLinks)-1) + "]")
+    def searchGame(self, toSearch):
+        """First step: Search through nxbrew"""
+        # Reset Chromedriver
+        try:
+            self.browser.close()
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+        except:
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+        
+        # Clear cookies
+        self.browser.delete_all_cookies()
+        # Tunnel with Proxy
+        self.browser.get(proxy)
+        inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
+        # toSearch = GUI InputBox
+        # toSearch = input("Type here the game you want to search for: ")
+        url = "https://nxbrew.com/search/"+toSearch+"/"
+        # Proxy tunnel the request
+        self.Proxy(inputBox, url)
 
-    # Skippin' link shortners
-    CleanLink(choice)
+    def listIcons(self):
+        iconsLinks = []
+        sizes = []
+        icons = self.browser.find_elements_by_class_name("post-thumbnail")
+        for icon in icons:
+            # This are the links that need to be passed to the GUI for icon replacement
+            height = int(icon.find_element_by_xpath(".//*/img").get_attribute("naturalHeight"))
+            width = int(icon.find_element_by_xpath(".//*/img").get_attribute("naturalWidth"))
+            sizes.append((height, width))
+            iconsLinks.append(icon.find_element_by_xpath(".//*/img").get_attribute("src"))
 
-    # Bypass fake robot check by insta-killing javascript with 4 ESCAPE inputs
-    for x in range(0, 4):
-        browser.execute_script("window.stop();")
+        return iconsLinks, sizes
 
-    # Wait for 3 seconds to end with while loop
-    finalLink = browser.find_element_by_xpath("/html/body/div[1]/div/div/section/div/div/div/div/div[3]/a").get_attribute("href")
-    while "javascript" in finalLink:
-        finalLink = browser.find_element_by_xpath("/html/body/div[1]/div/div/section/div/div/div/div/div[3]/a").get_attribute("href")
+    def listGames(self):
+        """Send all results found, after the search, to the GUI"""
+        links = []
+        # Index all results of the search specified in url -> toSearch
+        posts = self.browser.find_elements_by_class_name("post-title")
+        if not posts:
+            if (self.browser.current_url == "https://nl.hideproxy.me/index.php"):
+                return 1
 
-    # Print results out
-    prettifyOutput(finalLink)
+        for post in posts:
+            # This are the links that need to be passed to the browser for scrape()
+            links.append(post.find_element_by_xpath(".//*").get_attribute("href"))
 
-    # Kill the browser
-    browser.close()
+        # Check for no results
+        if len(links) == 0:
+            return 0
+        
+        # Return all results found during search to the GUI
+        # infos [0] = v.text
+        # infos [1] = links
+        infos = [],[]
+        for k,v in enumerate(posts):
+            infos[0].append(v.text)
+        infos[1].append(links)
 
-if __name__ == '__main__':
-    # Start
-    browser = driver().Driver
-    main()
-    exit()
+        return infos
+
+    def listLinks(self, link):
+        """Get download links"""
+        self.browser.get(link)
+        # Ask the user the number corresponding to the desired download link
+        downloadLinks = self.scrape(self.browser.page_source)
+        return downloadLinks
+
+    def cropImage(self, image, size):
+        # Selenium screenshots the screen at a default resolution of 800x600
+        # Size is a tuple containing height and width
+        # ((800 - width)/2, (600 - height)/2) = top-left corner of icon
+        # top-left + width & height = Icon
+        """Grabs the game icon, removes the black borders"""
+        boxArt = ((800-size[1])/2,(600-size[0])/2, (800-size[1])/2 + size[1], (600-size[0])/2 + size[0])
+        img = Image.open(image, mode="r")
+        cropped = img.crop(boxArt)
+        os.remove(image)
+        try:
+            cropped.save(image)
+        except SystemError as e:
+            print("Error: " + e)

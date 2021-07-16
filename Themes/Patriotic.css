@@ -1,0 +1,65 @@
+QListWidget {
+    border: rgb(100, 100, 100);
+    border: 20px, rgb(100, 100, 100);
+    border-radius: 10px;
+    background-color: red;
+    color: black;
+}
+QCheckBox {
+    color: black;
+}
+
+QLabel{
+    color: black;
+}
+
+QLineEdit {
+    border: 20px rgb(100, 100, 100);
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+}
+.QWidget {
+    background-color: green;
+    color: black;
+}
+.QDialog {
+    background-color: green;
+    color: black;
+}
+QMenuBar {
+    background-color: green;
+    color: white;
+}
+QMenuBar::item {
+    background-color: green;
+    color: white;
+}
+QMenuBar::item::selected {
+    background-color: red;
+    color: white;
+}
+QMenu {
+    background-color: green;
+    color: white;
+}
+QMenu::item::selected {
+    background-color: red;
+    color: white;
+}
+QComboBox {
+    background-color: red;
+    color: white;
+}
+QComboBox QAbstractItemView {
+    background-color: red;
+    color: white;
+}
+QPushButton {
+    background-color: red;
+    color: white;
+}
+QMessageBox {
+    background-color: green;
+    color: white;
+}
