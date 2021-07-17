@@ -2,12 +2,6 @@ import os
 from sys import implementation
 from Prettifier import *
 
-# Check if pip exists if not install
-if (os.system("pip -V") != 0):
-    os.system("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py")
-    os.system("python get-pip.py")
-    os.remove("get-pip.py")
-
 # Check if Pillow is already installed if not install 
 try:
     from PIL import Image

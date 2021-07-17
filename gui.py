@@ -1,8 +1,23 @@
 import os
+
+# Check if pip exists if not install
+if (os.system("pip -V") != 0):
+    os.system("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py")
+    os.system("python get-pip.py")
+    os.remove("get-pip.py")
+
+# Install PyQt5 if not found
+try:
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+except ModuleNotFoundError:
+    os.system("pip install PyQt5")
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+
 from about import About
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 from preferences import Preferences
 from SGD import SGD
 import webbrowser
