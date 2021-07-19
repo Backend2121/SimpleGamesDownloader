@@ -9,7 +9,7 @@
 
 ## Discord Server
 Join the Discord Server for questions, suggesting ideas/features and also to chill a bit.  
-https://discord.gg/WTrCtvyPke
+![Discord Shield](https://discordapp.com/api/guilds/857306107113766912/widget.png?style=shield)
 
 ---
 
