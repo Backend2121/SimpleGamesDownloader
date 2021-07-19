@@ -8,8 +8,10 @@
 ---
 
 ## Discord Server
-Join the Discord Server for questions, suggesting ideas/features and also to chill a bit.  
+Join the Discord Server for questions, suggesting ideas/features and also to chill a bit.
 ![Discord Banner 1](https://discordapp.com/api/guilds/857306107113766912/widget.png?style=banner1)
+
+https://discord.com/invite/WTrCtvyPke
 
 ---
 
