@@ -63,7 +63,13 @@ class SGD():
         downloadLink = self.browser.find_element_by_xpath("/html/body/header/div/div/div/div[1]/a").get_attribute("href")
         self.browser.get(downloadLink)
         unpoisonedLink = self.browser.find_element_by_xpath('/html/body/div[1]/form/div/input').get_attribute("value")
+
+        # TEMPORARY FIX TO AVOID CAPTCHA BYPASSING, NEEDS USER INPUT
+        return unpoisonedLink
+        # TEMPORARY FIX TO AVOID CAPTCHA BYPASSING, NEEDS USER INPUT
+        
         self.browser.get(unpoisonedLink)
+        
         
         # Bypass fake robot check by insta-killing javascript with 4 ESCAPE inputs
         for x in range(0, 4):
