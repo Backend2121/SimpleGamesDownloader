@@ -1,1 +1,2 @@
 python gui.py
+pause

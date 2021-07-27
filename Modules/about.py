@@ -11,6 +11,9 @@ class About(QWindow):
         with open("config.json",) as f:
             self.data = json.load(f)
             f.close()
+        with open("version.json",) as f:
+            self.version = json.load(f)
+            f.close()
         
         # Main Layout
         self.mainLayout = QVBoxLayout()
@@ -25,7 +28,7 @@ class About(QWindow):
 
         # Labels
         self.titleLabel = QLabel("Switch Games Downloader")
-        self.versionLabel = QLabel("Version: " + self.data["version"])
+        self.versionLabel = QLabel("Version: " + self.version["version"])
         self.descriptionLabel = QLabel("Now with a GUI!")
         
         # PushButtons

@@ -1,4 +1,5 @@
 import os
+import threading
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -36,6 +37,7 @@ class App():
             self.createWidgets()
             self.widget.show()
             self.checkUpdates()
+            self.checkChromeDriver()
             self.app.exec_()
 
     def alarm(self, title, label):
@@ -72,6 +74,53 @@ class App():
         # Execute
         message.exec_()
 
+    def chromeDriverNotFound(self, title, label):
+        """Create a pop-up widget used to notify the user"""
+
+        # Create QMessageBox and set text and title
+        message = QMessageBox()
+        message.setWindowTitle(title)
+        message.setText(label)
+        # Icon of widget
+        message.setWindowIcon(QIcon("Icons\\Switch.png"))
+
+        # Set style
+        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+
+        # Create buttons
+        download = QPushButton(' Download')
+        close = QPushButton(' Close')
+        download.setIcon(QIcon("Icons\\DownloadIcon.png")) #REPLACE WITH DOWNLOAD ICON
+
+        # Assign buttons to QMessageBox
+        message.addButton(close, QMessageBox.NoRole)
+        message.addButton(download, QMessageBox.YesRole)
+
+        # Listeners
+        download.clicked.connect(self.startCDDownload)
+
+        # Execute
+        message.exec_()
+
+    def startCDDownload(self):
+        # Import ChromeDriver downloader
+        from Modules.chromedriverGetter import getCD
+        downloader = threading.Thread(target=getCD)
+        downloader.start()
+        message = QMessageBox()
+        message.setWindowTitle("Downloading...")
+        message.setText("Getting the ChromeDriver for you <3!")
+        # Icon of widget
+        message.setWindowIcon(QIcon("Icons\\Switch.png"))
+
+        # Set style
+        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+
+        close = QPushButton(' Close')
+        message.addButton(close, QMessageBox.NoRole)
+
+        message.exec_()
+
     def openGithub(self):
         """Open latest release on GitHub"""
         webbrowser.open("https://github.com/Backend2121/SwitchGamesDownloader/releases/latest")
@@ -80,10 +129,16 @@ class App():
         version = os.popen("curl https://github.com/Backend2121/SwitchGamesDownloader/releases/latest").read()
         urlStart = version.find("/tag/")
         urlEnd = version.find('">')
-        if version[urlStart+5:urlEnd] == self.properties.data["version"]:
+        if version[urlStart+5:urlEnd] == self.properties.version["version"]:
             pass
         else:
             self.updateAvailable("Update found", "A new version of this software is available on GitHub!")
+    
+    def checkChromeDriver(self):
+        if os.path.isfile("chromedriver.exe"):
+            return
+        else:
+            self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
 
     def linkPopUp(self, title, label):
         """Create a pop-up widget used to copy informations"""

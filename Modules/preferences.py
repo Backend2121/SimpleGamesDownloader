@@ -9,6 +9,9 @@ class Preferences():
         with open("config.json",) as f:
             self.data = json.load(f)
             f.close()
+        with open("version.json",) as f:
+            self.version = json.load(f)
+            f.close()
 
         # Main widget
         self.widget = QDialog()
