@@ -17,9 +17,9 @@ except ModuleNotFoundError:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
 
-from about import About
-from preferences import Preferences
-from SGD import SGD
+from Modules.about import About
+from Modules.preferences import Preferences
+from Modules.SGD import SGD
 import webbrowser
 import random
 
