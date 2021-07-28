@@ -105,20 +105,31 @@ class App():
     def startCDDownload(self):
         # Import ChromeDriver downloader
         from Modules.chromedriverGetter import getCD
-        downloader = threading.Thread(target=getCD)
-        downloader.start()
         message = QMessageBox()
+        layout = message.layout()
         message.setWindowTitle("Downloading...")
-        message.setText("Getting the ChromeDriver for you <3!")
+
+        # Define widgets
+        pbar = QProgressBar()
+        label = QLabel("Getting the ChromeDriver for you <3!")
+
+        # Add to layout
+        layout.addWidget(label, 0, 0)
+        layout.addWidget(pbar, 1, 0)
+
         # Icon of widget
         message.setWindowIcon(QIcon("Icons\\Switch.png"))
 
         # Set style
         message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
-
         close = QPushButton(' Close')
         message.addButton(close, QMessageBox.NoRole)
 
+        # Start downloader thread
+        downloader = threading.Thread(target=getCD, args=(pbar,))
+        downloader.start()
+
+        # Start window
         message.exec_()
 
     def openGithub(self):
