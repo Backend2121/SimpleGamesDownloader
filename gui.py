@@ -1,5 +1,4 @@
 import os
-import threading
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -104,33 +103,40 @@ class App():
 
     def startCDDownload(self):
         # Import ChromeDriver downloader
-        from Modules.chromedriverGetter import getCD
+        from Modules.chromedriverGetter import worker
         message = QMessageBox()
         layout = message.layout()
         message.setWindowTitle("Downloading...")
 
         # Define widgets
-        pbar = QProgressBar()
+        self.pbar = QProgressBar()
         label = QLabel("Getting the ChromeDriver for you <3!")
 
         # Add to layout
         layout.addWidget(label, 0, 0)
-        layout.addWidget(pbar, 1, 0)
+        layout.addWidget(self.pbar, 1, 0)
 
         # Icon of widget
         message.setWindowIcon(QIcon("Icons\\Switch.png"))
 
         # Set style
         message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
-        close = QPushButton(' Close')
-        message.addButton(close, QMessageBox.NoRole)
-
+        self.close = QPushButton(' Close')
+        message.addButton(self.close, QMessageBox.YesRole)
+        self.close.setEnabled(False)
         # Start downloader thread
-        downloader = threading.Thread(target=getCD, args=(pbar,))
+        downloader = worker()
+        downloader.updated.connect(self.updatePBar)
         downloader.start()
 
         # Start window
         message.exec_()
+
+    def updatePBar(self, value):
+        print(value)
+        self.pbar.setValue(value)
+        if (value >= 99):
+            self.close.setEnabled(True)
 
     def openGithub(self):
         """Open latest release on GitHub"""
