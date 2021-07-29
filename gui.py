@@ -288,7 +288,7 @@ class App():
 
     def outputLink(self, link):
         # Ads skipping and stuff inside SGD.py
-        if link != None:
+        if "http" in link:
             self.linkPopUp("Success!", link)
         else:
             self.resultBox.setText("Error: The entry you choose is not a link!")
