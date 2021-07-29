@@ -138,7 +138,6 @@ class App():
         message.exec_()
 
     def updatePBar(self, value):
-        print(value)
         self.pbar.setValue(value)
         if (value >= 99):
             self.close.setEnabled(True)
@@ -164,7 +163,7 @@ class App():
 
     def linkPopUp(self, title, label):
         """Create a pop-up widget used to copy informations"""
-
+        
         # Create QMessageBox and set text and title
         self.message = QMessageBox()
         self.message.setWindowTitle(title)
@@ -202,8 +201,14 @@ class App():
         """Open shown link in a browser"""
         webbrowser.open(self.message.text())
 
+    def directBrowser(self, text):
+        """Open link passed in as argument"""
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+        webbrowser.open(text)
+
     def greetings(self):
-        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!"]
+        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!", "SGD has a Patreon!"]
         return greets[random.randrange(0,len(greets))]
 
     def DownloadIcon(self):
@@ -288,8 +293,14 @@ class App():
 
     def outputLink(self, link):
         # Ads skipping and stuff inside SGD.py
+        # Re-enable links list
+        self.linksListWidget.setDisabled(False)
         if "http" in link:
-            self.linkPopUp("Success!", link)
+            # If openLinks in config.json is set to 1, skip this function and open the link in the browser
+            if self.properties.data["openLinks"] == 1:
+                self.directBrowser(link)
+            else:
+                self.linkPopUp("Success!", link)
         else:
             self.resultBox.setText("Error: The entry you choose is not a link!")
 
@@ -303,6 +314,8 @@ class App():
             self.cleanWorker = cleanLinkWorker(self.sgd, self.linksListWidget.selectedItems()[0].text())
             self.cleanWorker.start()
             self.cleanWorker.done.connect(self.outputLink)
+            # Disable links list
+            self.linksListWidget.setDisabled(True)
         except:
             pass
 

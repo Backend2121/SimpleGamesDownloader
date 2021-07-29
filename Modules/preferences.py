@@ -47,6 +47,7 @@ class Preferences():
 
         # TickBoxes
         self.loadIcons = QCheckBox("Load Icons")
+        self.openLinks = QCheckBox("Always open links in the browser")
 
         # TextBoxes
         self.widthTextBox = QLineEdit("800")
@@ -66,6 +67,7 @@ class Preferences():
         # Assign to layout
         self.topCenter.addWidget(self.label)
         self.tickBoxes.addWidget(self.loadIcons, 0, 0)
+        self.tickBoxes.addWidget(self.openLinks, 1, 0)
         self.buttonLayout.addWidget(self.ok)
 
         # Assign to form layout
@@ -78,6 +80,7 @@ class Preferences():
 
         # Self-apply config.json
         self.loadIcons.setChecked(bool(self.data["loadicons"]))
+        self.openLinks.setChecked(bool(self.data["openLinks"]))
         self.widthTextBox.setText(str(self.data["Width"]))
         self.heightTextBox.setText(str(self.data["Height"]))
         self.GameIconSizePxTextBox.setText(str(self.data["GameIconSizePx"]))
@@ -87,6 +90,7 @@ class Preferences():
 
         # Define listeners
         self.loadIcons.stateChanged.connect(self.stateChange)
+        self.openLinks.stateChanged.connect(self.stateChange)
         self.widthTextBox.textChanged.connect(self.stateChange)
         self.heightTextBox.textChanged.connect(self.stateChange)
         self.GameIconSizePxTextBox.textChanged.connect(self.stateChange)
@@ -98,6 +102,9 @@ class Preferences():
     def stateChange(self):
         if self.loadIcons.isChecked(): self.data["loadicons"] = 1
         else: self.data["loadicons"] = 0
+
+        if self.openLinks.isChecked(): self.data["openLinks"] = 1
+        else: self.data["openLinks"] = 0
         
         # Width/Height failsafe
         try:

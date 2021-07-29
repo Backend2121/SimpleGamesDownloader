@@ -29,7 +29,7 @@ class About(QWindow):
         # Labels
         self.titleLabel = QLabel("Switch Games Downloader")
         self.versionLabel = QLabel("Version: " + self.version["version"])
-        self.descriptionLabel = QLabel("Now with a GUI!")
+        self.descriptionLabel = QLabel("MultiThreading update!")
         
         # PushButtons
         self.discordButton = QPushButton(" Discord")
@@ -40,12 +40,17 @@ class About(QWindow):
         self.redditButton.setIcon(QIcon("Icons\\Reddit.png"))
         self.redditButton.setIconSize(QSize(20,20))
 
+        self.patreonButton = QPushButton(" Patreon")
+        self.patreonButton.setIcon(QIcon("Icons\\Patreon.png"))
+        self.patreonButton.setIconSize(QSize(20,20))
+
         # Add to mainLayout
         self.mainLayout.addWidget(self.titleLabel)
         self.mainLayout.addWidget(self.versionLabel)
         self.mainLayout.addWidget(self.descriptionLabel)
         self.mainLayout.addWidget(self.discordButton)
         self.mainLayout.addWidget(self.redditButton)
+        self.mainLayout.addWidget(self.patreonButton)
 
         # Set main Layout
         self.widget.setLayout(self.mainLayout)
@@ -56,6 +61,7 @@ class About(QWindow):
         #Listeners
         self.discordButton.clicked.connect(self.openBrowserDiscord)
         self.redditButton.clicked.connect(self.openBrowserReddit)
+        self.patreonButton.clicked.connect(self.openBrowserPatreon)
         # Show window
         self.widget.show()
 
@@ -64,3 +70,6 @@ class About(QWindow):
 
     def openBrowserReddit(self):
         webbrowser.open("https://www.reddit.com/user/Sbigioduro")
+
+    def openBrowserPatreon(self):
+        webbrowser.open("https://www.patreon.com/Backend2121")
