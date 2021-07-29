@@ -20,6 +20,11 @@ except ModuleNotFoundError:
 from Modules.about import About
 from Modules.preferences import Preferences
 from Modules.SGD import SGD
+from Modules.Workers.searchGamesWorker import searchGamesWorker
+from Modules.Workers.listGamesWorker import listGamesWorker
+from Modules.Workers.iconGamesWorker import iconGamesWorker
+from Modules.Workers.listLinksWorker import listLinksWorker
+from Modules.Workers.cleanLinkWorker import cleanLinkWorker
 import webbrowser
 import random
 
@@ -159,22 +164,31 @@ class App():
 
     def linkPopUp(self, title, label):
         """Create a pop-up widget used to copy informations"""
+
         # Create QMessageBox and set text and title
         self.message = QMessageBox()
         self.message.setWindowTitle(title)
         self.message.setText(label)
+
         # Set style
         self.message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
 
         # Create buttons
         copy = QPushButton('Copy')
         browser = QPushButton('Open')
+
         # Assign buttons to QMessageBox
         self.message.addButton(copy, QMessageBox.YesRole)
         self.message.addButton(browser, QMessageBox.YesRole)
+
         # Listeners
         copy.clicked.connect(self.copy)
         browser.clicked.connect(self.browser)
+
+        # Reset output box
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+
         # Execute
         self.message.exec_()
 
@@ -201,30 +215,28 @@ class App():
             self.sgd.cropImage("GameIcons\\" + str(k) + ".png", self.sizes[k])
 
     def search(self):
+        # Clear any previous garbage
         self.listWidget.clear()
         self.linksListWidget.clear()
+
+        # Instantiate universal SGD class
         try:
             if self.sgd in locals(): pass
         except:
             self.sgd = SGD()
-        self.searchText = self.searchBox.text()
-        self.sgd.searchGame(self.searchText)
-        # Attach to first part of SGD.py
-        self.populateSearchList()
 
-    def selectGame(self):
-        """Once game is selected, links will be provided on the right side box"""
-        self.linksListWidget.clear()
+        # Create and start searchGamesWorker thread
+        self.searchWorker = searchGamesWorker(self.sgd, self.searchBox.text())
+        self.searchWorker.start()
+        self.searchWorker.finished.connect(self.populateSearchList)
+        self.searchButton.setEnabled(False)
+        self.movieLoading = QMovie("Icons\\Loading.gif")
+        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
+        self.resultBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
 
-        # Make resume
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\" + str(self.listWidget.currentRow()) + ".png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
-        self.resumeLabel.setText(self.infos[0][self.listWidget.currentRow()])
-        self.resumeLabel.setFont(QFont("Arial", self.properties.data["resumefont"]))
-        self.resumeLayout.addWidget(self.resumeIcon)
-        self.resumeLayout.addWidget(self.resumeLabel)
-
-        # Save the tuple element returned from listLinks
-        tupleElement = self.sgd.listLinks(self.infos[1][0][self.listWidget.currentRow()])
+    def displayLinks(self, value):
+        tupleElement = value
         for k,v in enumerate(tupleElement[0]):
             # Entries
             if tupleElement[1][k] != "- ":
@@ -250,15 +262,47 @@ class App():
                     item.setForeground(QColor("green"))
             # Printing links on the rightside box
             self.linksListWidget.addItem(item)
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+
+    def selectGame(self):
+        """Once game is selected, links will be provided on the right side box"""
+        self.linksListWidget.clear()
+
+        # Make resume
+        self.resumeIcon.setPixmap(QPixmap("GameIcons\\" + str(self.listWidget.currentRow()) + ".png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        self.resumeLabel.setText(self.infos[0][self.listWidget.currentRow()])
+        self.resumeLabel.setFont(QFont("Arial", self.properties.data["resumefont"]))
+        self.resumeLayout.addWidget(self.resumeIcon)
+        self.resumeLayout.addWidget(self.resumeLabel)
+
+        # Save the tuple element returned from listLinks
+        # Create and start listLinksWorker thread
+        self.linksWorker = listLinksWorker(self.sgd, self.infos[1][0][self.listWidget.currentRow()])
+        self.linksWorker.start()
+        self.linksWorker.done.connect(self.displayLinks)
+        self.movieLoading = QMovie("Icons\\Loading.gif")
+        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
+        self.resultBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
+
+    def outputLink(self, link):
+        # Ads skipping and stuff inside SGD.py
+        if link != None:
+            self.linkPopUp("Success!", link)
+        else:
+            self.resultBox.setText("Error: The entry you choose is not a link!")
 
     def fetchDownloadLink(self):
+        self.movieLoading = QMovie("Icons\\Loading.gif")
+        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
+        self.resultBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
         try:
-            link = self.sgd.CleanLink(self.linksListWidget.selectedItems()[0].text())
-            # Ads skipping and stuff inside SGD.py
-            if link != None:
-                self.linkPopUp("Success!", link)
-            else:
-                self.resultBox.setText("Error: The entry you choose is not a link!")
+            # Create and start cleanLinkWorker thread
+            self.cleanWorker = cleanLinkWorker(self.sgd, self.linksListWidget.selectedItems()[0].text())
+            self.cleanWorker.start()
+            self.cleanWorker.done.connect(self.outputLink)
         except:
             pass
 
@@ -274,20 +318,11 @@ class App():
 
         # Theme
         self.widget.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
-    
-    def populateSearchList(self):
-        # This will be populated by search results with icons and game title
-        self.listWidget.clear()
-        self.linksListWidget.clear()
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\default.png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
-        self.resumeLabel.clear()
-        self.infos = self.sgd.listGames()
-        if self.infos == 1:
-            self.search()
-        if self.properties.data["loadicons"] == 1:
-            self.icons = self.sgd.listIcons()[0]
-            self.sizes = self.sgd.listIcons()[1]
-            self.DownloadIcon()
+
+    def createList(self, value):
+        self.icons = value[0]
+        self.sizes = value[1]
+        self.DownloadIcon()
         try:
             if self.properties.data["loadicons"] == 1:
                 for k,v in enumerate(self.infos[0]):
@@ -300,6 +335,30 @@ class App():
             # No results found error
             self.alarm("Error", "No results found!")
         self.listWidget.setIconSize(QSize((self.properties.data["GameIconSizePx"]), (self.properties.data["GameIconSizePx"])))
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+
+    def makeInfos(self, value):
+        self.infos = value
+        if self.infos == 1:
+            self.search()
+        if self.properties.data["loadicons"] == 1:
+            # Create and start listIconsWorker thread
+            self.iconWorker = iconGamesWorker(self.sgd)
+            self.iconWorker.start()
+            self.iconWorker.done.connect(self.createList)
+
+    def populateSearchList(self):
+        # This will be populated by search results with icons and game title
+        self.listWidget.clear()
+        self.linksListWidget.clear()
+        self.resumeIcon.setPixmap(QPixmap("GameIcons\\default.png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        self.resumeLabel.clear()
+        # Create and start listGamesWorker thread
+        self.gamesWorker = listGamesWorker(self.sgd)
+        self.gamesWorker.start()
+        self.gamesWorker.done.connect(self.makeInfos)
+        self.searchButton.setEnabled(True)
 
     def createLayout(self):
         # Create general layout
@@ -376,6 +435,7 @@ class App():
         self.searchButton = QPushButton()
         self.searchButton.setIcon(QIcon("Icons\\WebScraping.png"))
         self.searchButton.setIconSize(QSize((self.properties.data["UIIconSizePx"]), (self.properties.data["UIIconSizePx"])))
+        self.searchButton.setShortcut("Return")
         self.searchFunctionLayout.addWidget(self.searchButton)
 
         # Resume widget

@@ -56,7 +56,7 @@ class SGD():
         # User error checking
         if "/go.php" not in userInput:
             return
-        
+
         # Link skippin'
         userInput = userInput[userInput.find("/go.php"):]
         self.browser.get("https://nl.hideproxy.me" + userInput)

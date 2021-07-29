@@ -21,7 +21,7 @@ class About(QWindow):
         # Main Widget & modal
         self.widget = QWidget()
         self.widget.setWindowModality(Qt.ApplicationModal)
-        self.widget.resize(300,100)
+        self.widget.resize(600,200)
         self.widget.setWindowTitle("About")
         # Icon of widget
         self.widget.setWindowIcon(QIcon("Icons\\Switch.png"))
