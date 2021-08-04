@@ -70,7 +70,6 @@ class SGD():
         
         self.browser.get(unpoisonedLink)
         
-        
         # Bypass fake robot check by insta-killing javascript with 4 ESCAPE inputs
         for x in range(0, 4):
             self.browser.execute_script("window.stop();")

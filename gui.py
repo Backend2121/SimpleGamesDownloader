@@ -25,6 +25,7 @@ from Modules.Workers.listGamesWorker import listGamesWorker
 from Modules.Workers.iconGamesWorker import iconGamesWorker
 from Modules.Workers.listLinksWorker import listLinksWorker
 from Modules.Workers.cleanLinkWorker import cleanLinkWorker
+from Modules.Workers.manualCaptchaWorker import manualCaptchaWorker
 import webbrowser
 import random
 
@@ -296,13 +297,35 @@ class App():
         # Re-enable links list
         self.linksListWidget.setDisabled(False)
         if "http" in link:
-            # If openLinks in config.json is set to 1, skip this function and open the link in the browser
-            if self.properties.data["openLinks"] == 1:
+            # If openLinks in config.json is set to 1/True, open the link in the browser
+            if self.properties.data["openLinks"] == 1 and self.properties.data["semiAutoMode"] == 0:
+                self.directBrowser(link)
+
+            # Semi-Automatic mode preference
+            elif self.properties.data["semiAutoMode"] == 1:
+                self.captchaWorker = manualCaptchaWorker()
+                self.captchaWorker.setLink(link)
+                self.captchaWorker.start()
+                self.captchaWorker.done.connect(self.provideFinalLink)
+
+            # Ask the user to copy/open the link
+            elif self.properties.data["openLinks"] == 0:
+                self.linkPopUp("Success!", link)
+
+        else:
+            self.resultBox.setText("Error: The entry you choose is not a link!")
+
+    def provideFinalLink(self, link):
+        if link == "closed":
+            self.resultBox.setText("Error: Closed")
+            return
+        if self.properties.data["openLinks"] == 1:
+            if "magnet" not in link:
                 self.directBrowser(link)
             else:
                 self.linkPopUp("Success!", link)
         else:
-            self.resultBox.setText("Error: The entry you choose is not a link!")
+            self.linkPopUp("Success!", link)
 
     def fetchDownloadLink(self):
         self.movieLoading = QMovie("Icons\\Loading.gif")

@@ -9,6 +9,8 @@ class Preferences():
         with open("config.json",) as f:
             self.data = json.load(f)
             f.close()
+        
+        # Load version.json file
         with open("version.json",) as f:
             self.version = json.load(f)
             f.close()
@@ -48,6 +50,8 @@ class Preferences():
         # TickBoxes
         self.loadIcons = QCheckBox("Load Icons")
         self.openLinks = QCheckBox("Always open links in the browser")
+        self.semiAuto = QCheckBox("Semi-auto mode")
+        self.adBlocker = QCheckBox("AdBlocker")
 
         # TextBoxes
         self.widthTextBox = QLineEdit("800")
@@ -68,6 +72,8 @@ class Preferences():
         self.topCenter.addWidget(self.label)
         self.tickBoxes.addWidget(self.loadIcons, 0, 0)
         self.tickBoxes.addWidget(self.openLinks, 1, 0)
+        self.tickBoxes.addWidget(self.semiAuto, 2, 0)
+        self.tickBoxes.addWidget(self.adBlocker, 3, 0)
         self.buttonLayout.addWidget(self.ok)
 
         # Assign to form layout
@@ -81,6 +87,8 @@ class Preferences():
         # Self-apply config.json
         self.loadIcons.setChecked(bool(self.data["loadicons"]))
         self.openLinks.setChecked(bool(self.data["openLinks"]))
+        self.semiAuto.setChecked(bool(self.data["semiAutoMode"]))
+        self.adBlocker.setChecked(bool(self.data["adBlock"]))
         self.widthTextBox.setText(str(self.data["Width"]))
         self.heightTextBox.setText(str(self.data["Height"]))
         self.GameIconSizePxTextBox.setText(str(self.data["GameIconSizePx"]))
@@ -88,9 +96,15 @@ class Preferences():
         self.themes.setCurrentText(self.data["theme"])
         self.ResumefontsizeTextBox.setText(str(self.data["resumefont"]))
 
+        # Set tooltips 
+        self.semiAuto.setToolTip("ON: The user will be asked to solve the Captcha, once solved the script will continue on it's own<br>OFF: The program will only reach the Captcha page, you will need to continue on your own")
+        self.adBlocker.setToolTip("ON: Disables intrusive ads ONLY in Captcha page<br>OFF: Renders ALL the ads in the Captcha page<br>Personal Note: Leave this unchecked as ads supports the website's owner(s)")
+
         # Define listeners
         self.loadIcons.stateChanged.connect(self.stateChange)
         self.openLinks.stateChanged.connect(self.stateChange)
+        self.semiAuto.stateChanged.connect(self.stateChange)
+        self.adBlocker.stateChanged.connect(self.stateChange)
         self.widthTextBox.textChanged.connect(self.stateChange)
         self.heightTextBox.textChanged.connect(self.stateChange)
         self.GameIconSizePxTextBox.textChanged.connect(self.stateChange)
@@ -105,6 +119,12 @@ class Preferences():
 
         if self.openLinks.isChecked(): self.data["openLinks"] = 1
         else: self.data["openLinks"] = 0
+
+        if self.semiAuto.isChecked(): self.data["semiAutoMode"] = 1
+        else: self.data["semiAutoMode"] = 0
+
+        if self.adBlocker.isChecked(): self.data["adBlock"] = 1
+        else: self.data["adBlock"] = 0
         
         # Width/Height failsafe
         try:
