@@ -1,7 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from Modules.Workers.adBlockerDownloaderWorker import adBlockerDownloaderWorker
 import json
+import os
 
 class Preferences():
     def __init__(self):
@@ -113,6 +115,9 @@ class Preferences():
         self.ResumefontsizeTextBox.textChanged.connect(self.stateChange)
         self.ok.clicked.connect(self.saveClose)
 
+    def closeDownloadingAdBlocker(self):
+        self.downloadAdBlockerMessage.close()
+
     def stateChange(self):
         if self.loadIcons.isChecked(): self.data["loadicons"] = 1
         else: self.data["loadicons"] = 0
@@ -123,8 +128,18 @@ class Preferences():
         if self.semiAuto.isChecked(): self.data["semiAutoMode"] = 1
         else: self.data["semiAutoMode"] = 0
 
-        if self.adBlocker.isChecked(): self.data["adBlock"] = 1
-        else: self.data["adBlock"] = 0
+        if self.adBlocker.isChecked():
+            self.data["adBlock"] = 1
+            if (os.path.isfile(os.getcwd() + "\\Modules\\adblock.crx")):
+                pass
+            else:
+                self.downloadAdBlockerMessage = QMessageBox()
+                self.adBlockerDownloader = adBlockerDownloaderWorker()
+                self.adBlockerDownloader.start()
+                self.adBlockerDownloader.done.connect(self.closeDownloadingAdBlocker)
+                self.downloadAdBlockerMessage.exec_()
+        else:
+            self.data["adBlock"] = 0
         
         # Width/Height failsafe
         try:

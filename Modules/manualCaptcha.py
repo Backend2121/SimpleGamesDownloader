@@ -16,7 +16,7 @@ class browser():
         self.options = Options()
         self.options.add_argument("user-agent=Generic")
         self.options.add_argument("disable-popup-blocking")
-        if self.data["adBlock"] == 1 or self.data["adBlock"] == "True": self.options.add_extension(os.getcwd() + "\\adblock.crx")
+        if self.data["adBlock"] == 1 or self.data["adBlock"] == "True": self.options.add_extension(os.getcwd() + "\\Modules\\adblock.crx")
         self.driver = webdriver.Chrome(executable_path=os.getcwd() + "\\Chromedriver.exe", chrome_options=self.options)
 
     def start(self, link):

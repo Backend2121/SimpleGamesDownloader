@@ -110,25 +110,27 @@ class App():
     def startCDDownload(self):
         # Import ChromeDriver downloader
         from Modules.chromedriverGetter import worker
-        message = QMessageBox()
-        layout = message.layout()
-        message.setWindowTitle("Downloading...")
+        self.CDDialog = QMessageBox()
+        layout = self.CDDialog.layout()
+        self.CDDialog.setWindowTitle("Downloading...")
 
         # Define widgets
         self.pbar = QProgressBar()
+        self.percent = QLabel()
         label = QLabel("Getting the ChromeDriver for you <3!")
 
         # Add to layout
         layout.addWidget(label, 0, 0)
         layout.addWidget(self.pbar, 1, 0)
+        # layout.addWidget(self.percent, 1, 1)
 
         # Icon of widget
-        message.setWindowIcon(QIcon("Icons\\Switch.png"))
+        self.CDDialog.setWindowIcon(QIcon("Icons\\Switch.png"))
 
         # Set style
-        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        self.CDDialog.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
         self.close = QPushButton(' Close')
-        message.addButton(self.close, QMessageBox.YesRole)
+        self.CDDialog.addButton(self.close, QMessageBox.YesRole)
         self.close.setEnabled(False)
         # Start downloader thread
         downloader = worker()
@@ -136,12 +138,14 @@ class App():
         downloader.start()
 
         # Start window
-        message.exec_()
+        self.CDDialog.exec_()
 
     def updatePBar(self, value):
         self.pbar.setValue(value)
+        # self.percent.setText(str(value) + "%")
         if (value >= 99):
             self.close.setEnabled(True)
+            self.CDDialog.close()
 
     def openGithub(self):
         """Open latest release on GitHub"""
@@ -209,7 +213,7 @@ class App():
         webbrowser.open(text)
 
     def greetings(self):
-        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!", "SGD has a Patreon!"]
+        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!", "Praise the Sun!", "For science, you monster", "It's dangerous to go alone, use me!"]
         return greets[random.randrange(0,len(greets))]
 
     def DownloadIcon(self):

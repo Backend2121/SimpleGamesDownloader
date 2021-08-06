@@ -63,3 +63,6 @@ QMessageBox {
     background-color: green;
     color: white;
 }
+QProgressBar {
+    color: white;
+}
