@@ -115,8 +115,11 @@ class Preferences():
         self.ResumefontsizeTextBox.textChanged.connect(self.stateChange)
         self.ok.clicked.connect(self.saveClose)
 
-    def closeDownloadingAdBlocker(self):
-        self.downloadAdBlockerMessage.close()
+    def closeDownloadingAdBlocker(self, value):
+        self.pbar.setValue(value)
+        if (value >= 99):
+            self.closeButton.setEnabled(True)
+            self.downloadAdBlockerMessage.close()
 
     def stateChange(self):
         if self.loadIcons.isChecked(): self.data["loadicons"] = 1
@@ -133,10 +136,31 @@ class Preferences():
             if (os.path.isfile(os.getcwd() + "\\Modules\\adblock.crx")):
                 pass
             else:
+                # Define message box + layout
                 self.downloadAdBlockerMessage = QMessageBox()
+                self.downloadAdBlockerMessageLayout = self.downloadAdBlockerMessage.layout()
+                
+                # Define messageBox default button
+                self.closeButton = QPushButton(" Close")
+                self.downloadAdBlockerMessage.addButton(self.closeButton, QMessageBox.YesRole)
+
+                # Define and set ProgressBar
+                self.pbar = QProgressBar()
+                self.downloadAdBlockerMessageLayout.addWidget(self.pbar, 1, 0)
+
+                # Set window stuff
+                self.downloadAdBlockerMessage.setWindowTitle("Downloading...")
+                self.adBlockLabel = QLabel("Getting the AdBlocker for you <3!")
+                self.downloadAdBlockerMessageLayout.addWidget(self.adBlockLabel, 0, 0)
+                self.downloadAdBlockerMessage.setStyleSheet(open("Themes\\" + self.data["theme"] + ".css", "r").read())
+
+                # Start adBlocker downloader worker
                 self.adBlockerDownloader = adBlockerDownloaderWorker()
                 self.adBlockerDownloader.start()
-                self.adBlockerDownloader.done.connect(self.closeDownloadingAdBlocker)
+                self.adBlockerDownloader.updated.connect(self.closeDownloadingAdBlocker)
+                self.closeButton.setEnabled(False)
+
+                # Execute
                 self.downloadAdBlockerMessage.exec_()
         else:
             self.data["adBlock"] = 0
