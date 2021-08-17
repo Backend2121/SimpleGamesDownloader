@@ -1,13 +1,20 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from Modules.Workers.adBlockerDownloaderWorker import adBlockerDownloaderWorker
 import json
+import os
 
 class Preferences():
     def __init__(self):
         # Load config.json file
         with open("config.json",) as f:
             self.data = json.load(f)
+            f.close()
+        
+        # Load version.json file
+        with open("version.json",) as f:
+            self.version = json.load(f)
             f.close()
 
         # Main widget
@@ -44,6 +51,9 @@ class Preferences():
 
         # TickBoxes
         self.loadIcons = QCheckBox("Load Icons")
+        self.openLinks = QCheckBox("Always open links in the browser")
+        self.semiAuto = QCheckBox("Semi-auto mode")
+        self.adBlocker = QCheckBox("AdBlocker")
 
         # TextBoxes
         self.widthTextBox = QLineEdit("800")
@@ -63,6 +73,9 @@ class Preferences():
         # Assign to layout
         self.topCenter.addWidget(self.label)
         self.tickBoxes.addWidget(self.loadIcons, 0, 0)
+        self.tickBoxes.addWidget(self.openLinks, 1, 0)
+        self.tickBoxes.addWidget(self.semiAuto, 2, 0)
+        self.tickBoxes.addWidget(self.adBlocker, 3, 0)
         self.buttonLayout.addWidget(self.ok)
 
         # Assign to form layout
@@ -75,6 +88,9 @@ class Preferences():
 
         # Self-apply config.json
         self.loadIcons.setChecked(bool(self.data["loadicons"]))
+        self.openLinks.setChecked(bool(self.data["openLinks"]))
+        self.semiAuto.setChecked(bool(self.data["semiAutoMode"]))
+        self.adBlocker.setChecked(bool(self.data["adBlock"]))
         self.widthTextBox.setText(str(self.data["Width"]))
         self.heightTextBox.setText(str(self.data["Height"]))
         self.GameIconSizePxTextBox.setText(str(self.data["GameIconSizePx"]))
@@ -82,8 +98,15 @@ class Preferences():
         self.themes.setCurrentText(self.data["theme"])
         self.ResumefontsizeTextBox.setText(str(self.data["resumefont"]))
 
+        # Set tooltips 
+        self.semiAuto.setToolTip("ON: The user will be asked to solve the Captcha, once solved the script will continue on it's own<br>OFF: The program will only reach the Captcha page, you will need to continue on your own")
+        self.adBlocker.setToolTip("ON: Disables intrusive ads ONLY in Captcha page<br>OFF: Renders ALL the ads in the Captcha page<br>Personal Note: Leave this unchecked as ads supports the website's owner(s)")
+
         # Define listeners
         self.loadIcons.stateChanged.connect(self.stateChange)
+        self.openLinks.stateChanged.connect(self.stateChange)
+        self.semiAuto.stateChanged.connect(self.stateChange)
+        self.adBlocker.stateChanged.connect(self.stateChange)
         self.widthTextBox.textChanged.connect(self.stateChange)
         self.heightTextBox.textChanged.connect(self.stateChange)
         self.GameIconSizePxTextBox.textChanged.connect(self.stateChange)
@@ -92,9 +115,55 @@ class Preferences():
         self.ResumefontsizeTextBox.textChanged.connect(self.stateChange)
         self.ok.clicked.connect(self.saveClose)
 
+    def closeDownloadingAdBlocker(self, value):
+        self.pbar.setValue(value)
+        if (value >= 99):
+            self.closeButton.setEnabled(True)
+            self.downloadAdBlockerMessage.close()
+
     def stateChange(self):
         if self.loadIcons.isChecked(): self.data["loadicons"] = 1
         else: self.data["loadicons"] = 0
+
+        if self.openLinks.isChecked(): self.data["openLinks"] = 1
+        else: self.data["openLinks"] = 0
+
+        if self.semiAuto.isChecked(): self.data["semiAutoMode"] = 1
+        else: self.data["semiAutoMode"] = 0
+
+        if self.adBlocker.isChecked():
+            self.data["adBlock"] = 1
+            if (os.path.isfile(os.getcwd() + "\\Modules\\adblock.crx")):
+                pass
+            else:
+                # Define message box + layout
+                self.downloadAdBlockerMessage = QMessageBox()
+                self.downloadAdBlockerMessageLayout = self.downloadAdBlockerMessage.layout()
+                
+                # Define messageBox default button
+                self.closeButton = QPushButton(" Close")
+                self.downloadAdBlockerMessage.addButton(self.closeButton, QMessageBox.YesRole)
+
+                # Define and set ProgressBar
+                self.pbar = QProgressBar()
+                self.downloadAdBlockerMessageLayout.addWidget(self.pbar, 1, 0)
+
+                # Set window stuff
+                self.downloadAdBlockerMessage.setWindowTitle("Downloading...")
+                self.adBlockLabel = QLabel("Getting the AdBlocker for you <3!")
+                self.downloadAdBlockerMessageLayout.addWidget(self.adBlockLabel, 0, 0)
+                self.downloadAdBlockerMessage.setStyleSheet(open("Themes\\" + self.data["theme"] + ".css", "r").read())
+
+                # Start adBlocker downloader worker
+                self.adBlockerDownloader = adBlockerDownloaderWorker()
+                self.adBlockerDownloader.start()
+                self.adBlockerDownloader.updated.connect(self.closeDownloadingAdBlocker)
+                self.closeButton.setEnabled(False)
+
+                # Execute
+                self.downloadAdBlockerMessage.exec_()
+        else:
+            self.data["adBlock"] = 0
         
         # Width/Height failsafe
         try:

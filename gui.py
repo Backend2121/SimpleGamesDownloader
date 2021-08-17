@@ -17,9 +17,15 @@ except ModuleNotFoundError:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
 
-from about import About
-from preferences import Preferences
-from SGD import SGD
+from Modules.about import About
+from Modules.preferences import Preferences
+from Modules.SGD import SGD
+from Modules.Workers.searchGamesWorker import searchGamesWorker
+from Modules.Workers.listGamesWorker import listGamesWorker
+from Modules.Workers.iconGamesWorker import iconGamesWorker
+from Modules.Workers.listLinksWorker import listLinksWorker
+from Modules.Workers.cleanLinkWorker import cleanLinkWorker
+from Modules.Workers.manualCaptchaWorker import manualCaptchaWorker
 import webbrowser
 import random
 
@@ -36,6 +42,7 @@ class App():
             self.createWidgets()
             self.widget.show()
             self.checkUpdates()
+            self.checkChromeDriver()
             self.app.exec_()
 
     def alarm(self, title, label):
@@ -72,6 +79,74 @@ class App():
         # Execute
         message.exec_()
 
+    def chromeDriverNotFound(self, title, label):
+        """Create a pop-up widget used to notify the user"""
+
+        # Create QMessageBox and set text and title
+        message = QMessageBox()
+        message.setWindowTitle(title)
+        message.setText(label)
+        # Icon of widget
+        message.setWindowIcon(QIcon("Icons\\Switch.png"))
+
+        # Set style
+        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+
+        # Create buttons
+        download = QPushButton(' Download')
+        close = QPushButton(' Close')
+        download.setIcon(QIcon("Icons\\DownloadIcon.png")) #REPLACE WITH DOWNLOAD ICON
+
+        # Assign buttons to QMessageBox
+        message.addButton(close, QMessageBox.NoRole)
+        message.addButton(download, QMessageBox.YesRole)
+
+        # Listeners
+        download.clicked.connect(self.startCDDownload)
+
+        # Execute
+        message.exec_()
+
+    def startCDDownload(self):
+        # Import ChromeDriver downloader
+        from Modules.chromedriverGetter import worker
+        self.CDDialog = QMessageBox()
+        layout = self.CDDialog.layout()
+        self.CDDialog.setWindowTitle("Downloading...")
+
+        # Define widgets
+        self.pbar = QProgressBar()
+        self.percent = QLabel()
+        label = QLabel("Getting the ChromeDriver for you <3!")
+
+        # Add to layout
+        layout.addWidget(label, 0, 0)
+        layout.addWidget(self.pbar, 1, 0)
+        # layout.addWidget(self.percent, 1, 1)
+
+        # Icon of widget
+        self.CDDialog.setWindowIcon(QIcon("Icons\\Switch.png"))
+
+        # Set style
+        self.CDDialog.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        self.close = QPushButton(' Close')
+        self.CDDialog.addButton(self.close, QMessageBox.YesRole)
+        self.close.setEnabled(False)
+        # Start downloader thread
+        downloader = worker()
+        downloader.updated.connect(self.updatePBar)
+        downloader.start()
+
+        # Start window
+        self.CDDialog.exec_()
+
+    def updatePBar(self, value):
+        self.pbar.setValue(value)
+        # self.percent.setText(str(value) + "%")
+        if (value >= 99):
+            self.close.setEnabled(True)
+            self.CDDialog.close()
+
     def openGithub(self):
         """Open latest release on GitHub"""
         webbrowser.open("https://github.com/Backend2121/SwitchGamesDownloader/releases/latest")
@@ -80,29 +155,44 @@ class App():
         version = os.popen("curl https://github.com/Backend2121/SwitchGamesDownloader/releases/latest").read()
         urlStart = version.find("/tag/")
         urlEnd = version.find('">')
-        if version[urlStart+5:urlEnd] == self.properties.data["version"]:
+        if version[urlStart+5:urlEnd] == self.properties.version["version"]:
             pass
         else:
             self.updateAvailable("Update found", "A new version of this software is available on GitHub!")
+    
+    def checkChromeDriver(self):
+        if os.path.isfile("chromedriver.exe"):
+            return
+        else:
+            self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
 
     def linkPopUp(self, title, label):
         """Create a pop-up widget used to copy informations"""
+        
         # Create QMessageBox and set text and title
         self.message = QMessageBox()
         self.message.setWindowTitle(title)
         self.message.setText(label)
+
         # Set style
         self.message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
 
         # Create buttons
         copy = QPushButton('Copy')
         browser = QPushButton('Open')
+
         # Assign buttons to QMessageBox
         self.message.addButton(copy, QMessageBox.YesRole)
         self.message.addButton(browser, QMessageBox.YesRole)
+
         # Listeners
         copy.clicked.connect(self.copy)
         browser.clicked.connect(self.browser)
+
+        # Reset output box
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+
         # Execute
         self.message.exec_()
 
@@ -116,8 +206,14 @@ class App():
         """Open shown link in a browser"""
         webbrowser.open(self.message.text())
 
+    def directBrowser(self, text):
+        """Open link passed in as argument"""
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+        webbrowser.open(text)
+
     def greetings(self):
-        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!"]
+        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!", "Praise the Sun!", "For science, you monster", "It's dangerous to go alone, use me!"]
         return greets[random.randrange(0,len(greets))]
 
     def DownloadIcon(self):
@@ -129,30 +225,28 @@ class App():
             self.sgd.cropImage("GameIcons\\" + str(k) + ".png", self.sizes[k])
 
     def search(self):
+        # Clear any previous garbage
         self.listWidget.clear()
         self.linksListWidget.clear()
+
+        # Instantiate universal SGD class
         try:
             if self.sgd in locals(): pass
         except:
             self.sgd = SGD()
-        self.searchText = self.searchBox.text()
-        self.sgd.searchGame(self.searchText)
-        # Attach to first part of SGD.py
-        self.populateSearchList()
 
-    def selectGame(self):
-        """Once game is selected, links will be provided on the right side box"""
-        self.linksListWidget.clear()
+        # Create and start searchGamesWorker thread
+        self.searchWorker = searchGamesWorker(self.sgd, self.searchBox.text())
+        self.searchWorker.start()
+        self.searchWorker.finished.connect(self.populateSearchList)
+        self.searchButton.setEnabled(False)
+        self.movieLoading = QMovie("Icons\\Loading.gif")
+        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
+        self.resultBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
 
-        # Make resume
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\" + str(self.listWidget.currentRow()) + ".png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
-        self.resumeLabel.setText(self.infos[0][self.listWidget.currentRow()])
-        self.resumeLabel.setFont(QFont("Arial", self.properties.data["resumefont"]))
-        self.resumeLayout.addWidget(self.resumeIcon)
-        self.resumeLayout.addWidget(self.resumeLabel)
-
-        # Save the tuple element returned from listLinks
-        tupleElement = self.sgd.listLinks(self.infos[1][0][self.listWidget.currentRow()])
+    def displayLinks(self, value):
+        tupleElement = value
         for k,v in enumerate(tupleElement[0]):
             # Entries
             if tupleElement[1][k] != "- ":
@@ -178,15 +272,77 @@ class App():
                     item.setForeground(QColor("green"))
             # Printing links on the rightside box
             self.linksListWidget.addItem(item)
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+
+    def selectGame(self):
+        """Once game is selected, links will be provided on the right side box"""
+        self.linksListWidget.clear()
+
+        # Make resume
+        self.resumeIcon.setPixmap(QPixmap("GameIcons\\" + str(self.listWidget.currentRow()) + ".png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        self.resumeLabel.setText(self.infos[0][self.listWidget.currentRow()])
+        self.resumeLabel.setFont(QFont("Arial", self.properties.data["resumefont"]))
+        self.resumeLayout.addWidget(self.resumeIcon)
+        self.resumeLayout.addWidget(self.resumeLabel)
+
+        # Save the tuple element returned from listLinks
+        # Create and start listLinksWorker thread
+        self.linksWorker = listLinksWorker(self.sgd, self.infos[1][0][self.listWidget.currentRow()])
+        self.linksWorker.start()
+        self.linksWorker.done.connect(self.displayLinks)
+        self.movieLoading = QMovie("Icons\\Loading.gif")
+        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
+        self.resultBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
+
+    def outputLink(self, link):
+        # Ads skipping and stuff inside SGD.py
+        # Re-enable links list
+        self.linksListWidget.setDisabled(False)
+        if "http" in link:
+            # If openLinks in config.json is set to 1/True, open the link in the browser
+            if self.properties.data["openLinks"] == 1 and self.properties.data["semiAutoMode"] == 0:
+                self.directBrowser(link)
+
+            # Semi-Automatic mode preference
+            elif self.properties.data["semiAutoMode"] == 1:
+                self.captchaWorker = manualCaptchaWorker()
+                self.captchaWorker.setLink(link)
+                self.captchaWorker.start()
+                self.captchaWorker.done.connect(self.provideFinalLink)
+
+            # Ask the user to copy/open the link
+            elif self.properties.data["openLinks"] == 0:
+                self.linkPopUp("Success!", link)
+
+        else:
+            self.resultBox.setText("Error: The entry you choose is not a link!")
+
+    def provideFinalLink(self, link):
+        if link == "closed":
+            self.resultBox.setText("Error: Closed")
+            return
+        if self.properties.data["openLinks"] == 1:
+            if "magnet" not in link:
+                self.directBrowser(link)
+            else:
+                self.linkPopUp("Success!", link)
+        else:
+            self.linkPopUp("Success!", link)
 
     def fetchDownloadLink(self):
+        self.movieLoading = QMovie("Icons\\Loading.gif")
+        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
+        self.resultBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
         try:
-            link = self.sgd.CleanLink(self.linksListWidget.selectedItems()[0].text())
-            # Ads skipping and stuff inside SGD.py
-            if link != None:
-                self.linkPopUp("Success!", link)
-            else:
-                self.resultBox.setText("Error: The entry you choose is not a link!")
+            # Create and start cleanLinkWorker thread
+            self.cleanWorker = cleanLinkWorker(self.sgd, self.linksListWidget.selectedItems()[0].text())
+            self.cleanWorker.start()
+            self.cleanWorker.done.connect(self.outputLink)
+            # Disable links list
+            self.linksListWidget.setDisabled(True)
         except:
             pass
 
@@ -202,20 +358,11 @@ class App():
 
         # Theme
         self.widget.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
-    
-    def populateSearchList(self):
-        # This will be populated by search results with icons and game title
-        self.listWidget.clear()
-        self.linksListWidget.clear()
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\default.png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
-        self.resumeLabel.clear()
-        self.infos = self.sgd.listGames()
-        if self.infos == 1:
-            self.search()
-        if self.properties.data["loadicons"] == 1:
-            self.icons = self.sgd.listIcons()[0]
-            self.sizes = self.sgd.listIcons()[1]
-            self.DownloadIcon()
+
+    def createList(self, value):
+        self.icons = value[0]
+        self.sizes = value[1]
+        self.DownloadIcon()
         try:
             if self.properties.data["loadicons"] == 1:
                 for k,v in enumerate(self.infos[0]):
@@ -228,6 +375,30 @@ class App():
             # No results found error
             self.alarm("Error", "No results found!")
         self.listWidget.setIconSize(QSize((self.properties.data["GameIconSizePx"]), (self.properties.data["GameIconSizePx"])))
+        self.resultBox.setText(self.greetings())
+        self.resultBox.movie = None
+
+    def makeInfos(self, value):
+        self.infos = value
+        if self.infos == 1:
+            self.search()
+        if self.properties.data["loadicons"] == 1:
+            # Create and start listIconsWorker thread
+            self.iconWorker = iconGamesWorker(self.sgd)
+            self.iconWorker.start()
+            self.iconWorker.done.connect(self.createList)
+
+    def populateSearchList(self):
+        # This will be populated by search results with icons and game title
+        self.listWidget.clear()
+        self.linksListWidget.clear()
+        self.resumeIcon.setPixmap(QPixmap("GameIcons\\default.png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        self.resumeLabel.clear()
+        # Create and start listGamesWorker thread
+        self.gamesWorker = listGamesWorker(self.sgd)
+        self.gamesWorker.start()
+        self.gamesWorker.done.connect(self.makeInfos)
+        self.searchButton.setEnabled(True)
 
     def createLayout(self):
         # Create general layout
@@ -304,6 +475,7 @@ class App():
         self.searchButton = QPushButton()
         self.searchButton.setIcon(QIcon("Icons\\WebScraping.png"))
         self.searchButton.setIconSize(QSize((self.properties.data["UIIconSizePx"]), (self.properties.data["UIIconSizePx"])))
+        self.searchButton.setShortcut("Return")
         self.searchFunctionLayout.addWidget(self.searchButton)
 
         # Resume widget

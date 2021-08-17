@@ -11,6 +11,9 @@ class About(QWindow):
         with open("config.json",) as f:
             self.data = json.load(f)
             f.close()
+        with open("version.json",) as f:
+            self.version = json.load(f)
+            f.close()
         
         # Main Layout
         self.mainLayout = QVBoxLayout()
@@ -18,15 +21,15 @@ class About(QWindow):
         # Main Widget & modal
         self.widget = QWidget()
         self.widget.setWindowModality(Qt.ApplicationModal)
-        self.widget.resize(300,100)
+        self.widget.resize(600,200)
         self.widget.setWindowTitle("About")
         # Icon of widget
         self.widget.setWindowIcon(QIcon("Icons\\Switch.png"))
 
         # Labels
         self.titleLabel = QLabel("Switch Games Downloader")
-        self.versionLabel = QLabel("Version: " + self.data["version"])
-        self.descriptionLabel = QLabel("Now with a GUI!")
+        self.versionLabel = QLabel("Version: " + self.version["version"])
+        self.descriptionLabel = QLabel("MultiThreading update!")
         
         # PushButtons
         self.discordButton = QPushButton(" Discord")

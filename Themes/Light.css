@@ -25,3 +25,6 @@ QMenu::item::selected {
     background-color: rgb(216, 216, 216);
     color: cornsilk;
 }
+QProgressBar {
+    color: black;
+}
