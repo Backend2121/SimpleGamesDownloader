@@ -1,5 +1,5 @@
 # SwitchGamesDownloader
-## Only for windows
+## Only for Windows
 
 ---
 
@@ -19,15 +19,15 @@ https://discord.com/invite/WTrCtvyPke
 ## PRE-REQUISITES
 1. You need to have Python3 installed in PATH
 2. You need to have Chrome installed
-3. You will need to download Chromedriver.exe and put it in the same path as SGD.py script (Make sure the ChromeDriver version is the same as the Chrome browser version you have)
-
 ---
 
 ## FEATURES
 * User-friendly GUI
 * Game search functionality
-* Ads skipping
+* Ad-blocker option
 * Proxyed requests
-* Direct game/update/DLC download link
+* Direct game/update/DLC download link (when using semi-auto mode)
 * Update notifier
 * Themes
+* ChromeDriver auto-downloader
+* MultiThreading
