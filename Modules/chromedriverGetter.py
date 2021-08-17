@@ -1,6 +1,12 @@
 import os
-import requests
-import sys
+
+# Install Requests if not found
+try:
+    import requests
+except ModuleNotFoundError:
+    os.system("pip install requests")
+    import requests
+
 from bs4 import BeautifulSoup
 import zipfile
 from PyQt5.QtWidgets import *

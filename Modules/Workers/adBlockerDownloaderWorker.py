@@ -1,8 +1,15 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import requests
 import os
+
+# Install Requests if not found
+try:
+    import requests
+except ModuleNotFoundError:
+    os.system("pip install requests")
+    import requests
+
 
 class adBlockerDownloaderWorker(QThread):
     """First thread called, provides the games page from the search"""
