@@ -17,7 +17,7 @@ https://discord.com/invite/WTrCtvyPke
 ---
 
 ## PRE-REQUISITES
-1. You need to have Python3 installed in PATH
+1. You need to have Python 3.9 installed in PATH
 2. You need to have Chrome installed
 ---
 
