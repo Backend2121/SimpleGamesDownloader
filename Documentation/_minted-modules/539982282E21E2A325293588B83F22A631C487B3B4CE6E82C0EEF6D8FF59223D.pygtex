@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+            \PYG{k}{def} \PYG{n+nf}{listIcons}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{tuple}\PYG{p}{[}\PYG{n+nb}{list}\PYG{p}{,} \PYG{n+nb}{list}\PYG{p}{]:}
+                \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Called by iconGamesWorker.py}
+
+\PYG{l+s+sd}{                Instantiated in SEARCH PHASE 3 of gui.py\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\end{Verbatim}

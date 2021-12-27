@@ -1,4 +1,9 @@
 import os
+import logging
+import importlib
+import webbrowser
+import random
+import sys
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -6,54 +11,68 @@ if (os.system("pip -V") != 0):
     os.system("python get-pip.py")
     os.remove("get-pip.py")
 
-# Install PyQt5 if not found
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-except ModuleNotFoundError:
-    os.system("pip install PyQt5")
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
+# Install all pre-requisites
+os.system("pip install -r requirements.txt")
 
-from Modules.about import About
-from Modules.preferences import Preferences
-from Modules.SGD import SGD
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+
+from Modules.Extras.about import About
+from Modules.Extras.preferences import Preferences
 from Modules.Workers.searchGamesWorker import searchGamesWorker
 from Modules.Workers.listGamesWorker import listGamesWorker
 from Modules.Workers.iconGamesWorker import iconGamesWorker
 from Modules.Workers.listLinksWorker import listLinksWorker
 from Modules.Workers.cleanLinkWorker import cleanLinkWorker
-from Modules.Workers.manualCaptchaWorker import manualCaptchaWorker
-import webbrowser
-import random
 
 class App():
-    def __init__(self, main):
+    def __init__(self, main: bool):
         if main:
             # Main App definitions
             self.app = QApplication([])
             self.window = QMainWindow()
             self.widget = QWidget()
-            self.properties = Preferences()
+            self.modulesSettings = []
+
+            # Define logger
+            self.log = logging.getLogger("MAIN_Logger")
+            logPath = os.path.normpath(os.getcwd() + "//ReplaceWithTime.log")
+            logging.basicConfig(filename=logPath , filemode='a', format='%(levelname)s - %(name)s - "%(asctime)s": %(message)s', level="INFO")
+
+            # Get general info of the running machine
+            self.log.info("PYTHON VERSION: {0}".format(sys.version))
+            self.log.info("PLATFORM: {0}".format(sys.platform))
+
+            # Import all modules in "Modules" folder
+            for f in os.listdir(os.path.normpath(os.getcwd() + "/Modules")):
+                if (".py" in f):
+                    f = f.replace(".py", "")
+                    imported = importlib.import_module("." + f, "Modules")
+                    x = imported.Settings()
+                    x.logPath = logPath
+                    self.modulesSettings.append(imported.Settings())
+
+            self.log.info("Loaded {0} module(s)".format(self.modulesSettings))
+            self.properties = Preferences(self.modulesSettings)
             self.createLayout()
             self.setWindowParameters()
             self.createWidgets()
             self.widget.show()
+            self.alarm("WARNING", "This software MUST ONLY be used to download LEGALLY BOUGHT GAMES to play them on emulators!\n\nI do not condone any form of piracy!")
             self.checkUpdates()
             self.checkChromeDriver()
             self.app.exec_()
-
-    def alarm(self, title, label):
-        """Used to deliver info/errors to the user (str, str)"""
+# REGION Pop-up Boxes
+    def alarm(self, title: str, label: str) -> None:
+        """Used to deliver info/errors to the user"""
         message = QMessageBox()
         # Set style
-        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
         # Display message
         message.about(self.widget, title, label)
 
-    def updateAvailable(self, title, label):
+    def updateAvailable(self, title: str, label: str) -> None:
         """Create a pop-up widget used to copy informations"""
 
         # Create QMessageBox and set text and title
@@ -61,14 +80,14 @@ class App():
         message.setWindowTitle(title)
         message.setText(label)
         # Icon of widget
-        message.setWindowIcon(QIcon("Icons\\Switch.png"))
+        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # Set style
-        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
 
         # Create buttons
         browser = QPushButton(' Open')
-        browser.setIcon(QIcon("Icons\\Github.png"))
+        browser.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Github.png")))
 
         # Assign buttons to QMessageBox
         message.addButton(browser, QMessageBox.YesRole)
@@ -77,25 +96,25 @@ class App():
         browser.clicked.connect(self.openGithub)
 
         # Execute
-        message.exec_()
-
-    def chromeDriverNotFound(self, title, label):
-        """Create a pop-up widget used to notify the user"""
+        message.exec_()# ENDREGION
+# REGION ChromeDriver Downloader
+    def chromeDriverNotFound(self, title: str, label: str) -> None:
+        """Create a pop-up widget used to notify download the ChromeDriver"""
 
         # Create QMessageBox and set text and title
         message = QMessageBox()
         message.setWindowTitle(title)
         message.setText(label)
         # Icon of widget
-        message.setWindowIcon(QIcon("Icons\\Switch.png"))
+        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # Set style
-        message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
 
         # Create buttons
         download = QPushButton(' Download')
         close = QPushButton(' Close')
-        download.setIcon(QIcon("Icons\\DownloadIcon.png")) #REPLACE WITH DOWNLOAD ICON
+        download.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/DownloadIcon.png"))) #REPLACE WITH DOWNLOAD ICON
 
         # Assign buttons to QMessageBox
         message.addButton(close, QMessageBox.NoRole)
@@ -107,9 +126,10 @@ class App():
         # Execute
         message.exec_()
 
-    def startCDDownload(self):
+    def startCDDownload(self) -> None:
+        """Doesn't work with Linux/MacOS"""
         # Import ChromeDriver downloader
-        from Modules.chromedriverGetter import worker
+        from Modules.Extras.chromedriverGetter import worker
         self.CDDialog = QMessageBox()
         layout = self.CDDialog.layout()
         self.CDDialog.setWindowTitle("Downloading...")
@@ -125,10 +145,10 @@ class App():
         # layout.addWidget(self.percent, 1, 1)
 
         # Icon of widget
-        self.CDDialog.setWindowIcon(QIcon("Icons\\Switch.png"))
+        self.CDDialog.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # Set style
-        self.CDDialog.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        self.CDDialog.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
         self.close = QPushButton(' Close')
         self.CDDialog.addButton(self.close, QMessageBox.YesRole)
         self.close.setEnabled(False)
@@ -139,19 +159,18 @@ class App():
 
         # Start window
         self.CDDialog.exec_()
-
-    def updatePBar(self, value):
+    
+    def updatePBar(self, value: int) -> None:
+        """Update progress bar using the value passed in (0-100)"""
         self.pbar.setValue(value)
-        # self.percent.setText(str(value) + "%")
         if (value >= 99):
             self.close.setEnabled(True)
-            self.CDDialog.close()
-
-    def openGithub(self):
+            self.CDDialog.close()# ENDREGION
+    def openGithub(self) -> None:
         """Open latest release on GitHub"""
         webbrowser.open("https://github.com/Backend2121/SwitchGamesDownloader/releases/latest")
 
-    def checkUpdates(self):
+    def checkUpdates(self) -> None:
         version = os.popen("curl https://github.com/Backend2121/SwitchGamesDownloader/releases/latest").read()
         urlStart = version.find("/tag/")
         urlEnd = version.find('">')
@@ -160,13 +179,13 @@ class App():
         else:
             self.updateAvailable("Update found", "A new version of this software is available on GitHub!")
     
-    def checkChromeDriver(self):
+    def checkChromeDriver(self) -> None:
         if os.path.isfile("chromedriver.exe"):
             return
         else:
             self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
 
-    def linkPopUp(self, title, label):
+    def linkPopUp(self, title: str, label: str) -> None:
         """Create a pop-up widget used to copy informations"""
         
         # Create QMessageBox and set text and title
@@ -175,170 +194,276 @@ class App():
         self.message.setText(label)
 
         # Set style
-        self.message.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        self.message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
 
         # Create buttons
         copy = QPushButton('Copy')
         browser = QPushButton('Open')
+        # Button for the auto download (grayed by default)
+        download = QPushButton('Download')
 
         # Assign buttons to QMessageBox
         self.message.addButton(copy, QMessageBox.YesRole)
         self.message.addButton(browser, QMessageBox.YesRole)
+        self.message.addButton(download, QMessageBox.YesRole)
 
         # Listeners
         copy.clicked.connect(self.copy)
         browser.clicked.connect(self.browser)
+        download.clicked.connect(self.downloadManager)
 
         # Reset output box
         self.resultBox.setText(self.greetings())
-        self.resultBox.movie = None
+        self.movieBox.clear()
 
         # Execute
         self.message.exec_()
-
-    def copy(self):
+# REGION LinkPopUp buttons functions
+    def copy(self) -> None:
         """Copy shown link"""
         cb = QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
         cb.setText(self.message.text(), mode=cb.Clipboard)
 
-    def browser(self):
+    def browser(self) -> None:
         """Open shown link in a browser"""
+        self.log.info("Opening browser to {0}".format(self.message.text()))
         webbrowser.open(self.message.text())
 
-    def directBrowser(self, text):
+    def downloadManager(self) -> None:
+        """PLACEHOLDER"""
+        print("PLACEHOLDER")# ENDREGION
+# REGION MISC/FUN
+    def greetings(self) -> str:
+        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!", "Praise the Sun!", "For science, you monster", "It's dangerous to go alone, use me!", "Stupid Shinigami", "Trust me i'm a dolphin!", "...", "Oh, it's you...", "The cake is a lie!", "FBI open up!", "You own the game, right?"]
+        return greets[random.randint(0, len(greets) - 1)]
+
+    def directBrowser(self, text: str) -> None:
         """Open link passed in as argument"""
         self.resultBox.setText(self.greetings())
-        self.resultBox.movie = None
-        webbrowser.open(text)
-
-    def greetings(self):
-        greets = ["Hi!", "Hello there!", "Hey!", "Honk!", "Whassup!", "I promise i won't hang", "What do you need?", "Here to help!", "How are you doing?", "Join the Discord!", "Praise the Sun!", "For science, you monster", "It's dangerous to go alone, use me!"]
-        return greets[random.randrange(0,len(greets))]
-
-    def DownloadIcon(self):
+        self.movieBox.clear()
+        webbrowser.open(text)# ENDREGION
+# REGION Search Phase
+    def DownloadIcon(self, module, name: str) -> None:
+        """Downloads the games icons inside 'GameIcons' folder"""
         for k,icon in enumerate(self.icons):
+            self.downloadCounter = self.downloadCounter + 1
             # Download image
-            self.sgd.browser.get(icon)
-            self.sgd.browser.save_screenshot("GameIcons\\" + str(k) + ".png")
+            module.browser.get(icon)
+            module.browser.save_screenshot(os.path.normpath(os.getcwd() + "/GameIcons/_" + name + "_" + str(self.downloadCounter) + ".png"))
             # Resize image
-            self.sgd.cropImage("GameIcons\\" + str(k) + ".png", self.sizes[k])
+            # The try except is needed because the first image to be downloaded is corrupted for some reason
+            try:
+                module.cropImage(os.path.normpath(os.getcwd() + "/GameIcons/_" + name + "_" + str(self.downloadCounter) + ".png"), self.sizes[k])
+            except:
+                continue
 
-    def search(self):
-        # Clear any previous garbage
-        self.listWidget.clear()
+    def lock(self, module):
+        self.done.append(module)
+        # Wait for all modules to complete the search
+        if len(self.done) < self.pending:
+            self.resultBox.setText("Completed search with " + str(len(self.done)) + "/" + str(self.pending) + " module(s)")
+            self.log.info("Completed search with " + str(len(self.done)) + "/" + str(self.pending) + " module(s) {0}".format(self.done))
+            return
+        else:
+            self.resultBox.setText("Completed search with all modules!")
+            self.log.info("Completed search with all modules!")
+            for mod in self.done:
+                self.populateSearchList(mod)
+            self.done.clear()
+
+    def search(self) -> None:
+        """SEARCH PHASE 1 Called after clicking on the search button"""
+        modules = []
+        # Dynamic import of modules (inside 'modules' folder)
+        for f in os.listdir(os.path.normpath(os.getcwd() + "/Modules")):
+            if (".py" in f):
+                print(f)
+                # Only add module to the modules array if module's setting 'Enable module' is true
+                f = f.replace(".py", "")
+                imported = importlib.import_module("." + f, "Modules")
+                for s in self.modulesSettings:
+                    if s.name == f:
+                        if s.enableThis.isChecked():
+                            modules.append(imported.module())
+        self.listSearchWorkers = []
+        self.listGamesWorkers = []
+        self.listIconsWorkers = []
+        self.done = []
+        self.infos = []
+        self.pending = len(modules)
+        self.downloadCounter = -1
         self.linksListWidget.clear()
+        # Repeat this for each module
+        for module in modules:
+            # Clear any previous garbage
+            self.listWidget.clear()
+            self.linksListWidget.clear()
 
-        # Instantiate universal SGD class
-        try:
-            if self.sgd in locals(): pass
-        except:
-            self.sgd = SGD()
+            # Create and start n searchGamesWorker threads and put them in a n-list
+            self.log.info("PHASE 1 SEARCHING {0} with {1}".format(self.searchBox.text(), module.name))
+            self.listSearchWorkers.append(searchGamesWorker(module, self.searchBox.text()))
+            self.listSearchWorkers[len(self.listSearchWorkers) - 1].start()
+            self.listSearchWorkers[len(self.listSearchWorkers) - 1].done.connect(self.lock)
+            self.searchButton.setEnabled(False)
 
-        # Create and start searchGamesWorker thread
-        self.searchWorker = searchGamesWorker(self.sgd, self.searchBox.text())
-        self.searchWorker.start()
-        self.searchWorker.finished.connect(self.populateSearchList)
-        self.searchButton.setEnabled(False)
-        self.movieLoading = QMovie("Icons\\Loading.gif")
-        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
-        self.resultBox.setMovie(self.movieLoading)
+        self.log.info("Search phase ended")
+
+        # Loading gif and modules progression
+        self.movieLoading = QMovie(os.path.normpath(os.getcwd() + "/Icons/Loading.gif"))
+        self.movieLoading.setScaledSize(QSize(self.properties.generalData["UIIconSizePx"] * 2, self.properties.generalData["UIIconSizePx"] * 2))
+        self.movieBox.setMovie(self.movieLoading)
+        self.resultBox.setText("Completed search with 0/" + str(self.pending) + " module(s)")
         self.movieLoading.start()
 
-    def displayLinks(self, value):
-        tupleElement = value
+    def populateSearchList(self, module) -> None:
+        """SEARCH PHASE 2 starts the worker tasked to fill the lefthand side of the GUI"""
+        # We reach here with the threaded modules, we need to do the same thing as above
+        self.log.info("Executing PHASE 2 with: {0} module".format(module[0].name))
+
+        # This will be populated by search results with icons and game title
+        self.listWidget.clear()
+        self.linksListWidget.clear()
+        self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/default.png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        self.resumeLabel.clear()
+
+        # Create and start n-listGamesWorker thread and put them in a n-list
+        self.listGamesWorkers.append(listGamesWorker(module[0]))
+        self.listGamesWorkers[len(self.listGamesWorkers) - 1].start()
+        self.listGamesWorkers[len(self.listGamesWorkers) - 1].done.connect(self.makeInfos)
+        self.searchButton.setEnabled(True)
+
+    def makeInfos(self, value):
+        """SEARCH PHASE 3 Receives the return value of the search fuction of the module containing a 2-dimensional array value[0] = titles value[1] = links. If needed it also starts the worker tasked to fetch the games respective icons"""
+        self.log.info("Executing PHASE 3 with: {0} module".format(value[1].name))
+        # Retain a list of 2d arrays containing [0]titles [1]links
+        self.infos.append(value[0])
+        if self.properties.generalData["loadicons"] == 1:
+            # Create and start listIconsWorker thread if loadIcons setting is True
+            self.listIconsWorkers.append(iconGamesWorker(value[1]))
+            self.listIconsWorkers[len(self.listIconsWorkers) - 1].start()
+            self.listIconsWorkers[len(self.listIconsWorkers) - 1].done.connect(self.createList)
+        else:
+            # Pass to createList only the module's name
+            self.createList([None, value[1]])
+
+    def lock2(self, module):
+        """Wait for all module's PHASE 3 to have finished"""
+        self.done.append(module)
+        if len(self.done) < self.pending:
+            self.resultBox.setText("Finalized search with " + str(len(self.done)) + "/" + str(self.pending) + "module(s)")
+            return False
+        else:
+            self.resultBox.setText("Finalized search with all mudles!")
+            return True
+
+    def createList(self, value):
+        """SEARCH PHASE 4 Lists all the titles (+ icons) on the left and resets the state of the GUI"""
+        self.str_titles = []
+        self.str_links = []
+        # Add condition to disable this function
+        if self.properties.generalData["loadicons"] == 1:
+            self.log.info("Executing PHASE 4 with: {0} module".format(value[1].name))
+            self.icons = value[0][0]
+            self.sizes = value[0][1]
+            self.DownloadIcon(value[1], value[1].name)
+        else:
+            self.log.info("Executing PHASE 4 with: {0} module".format(value[1].name))
+        # Get lock status
+        if self.lock2(value[1]):
+            try:
+                counter = -1
+                offset = -1
+                for Set in self.infos:
+                    offset = offset + 1
+                    for k,v in enumerate(Set[0]):
+                        counter = counter + 1
+                        if self.properties.generalData["loadicons"] == 1:
+                            self.listWidget.addItem(QListWidgetItem(QIcon(os.path.normpath(os.getcwd() + "/GameIcons/_" + self.done[offset].name + "_" + str(counter) + ".png")), str(v)))
+                        else:
+                            self.listWidget.addItem(QListWidgetItem(QIcon(os.path.normpath(os.getcwd() + "/GameIcons/default.png")), str(v)))
+                        self.str_titles.append(v)
+                        self.str_links.append((Set[1][k], offset))
+                self.log.info("Waiting for USER to choose GAME")
+            except TypeError as e:
+                # No results found error
+                self.log.error("NO RESULTS FOUND!")
+                self.alarm("Error", "No results found!")
+            self.listWidget.setIconSize(QSize((self.properties.generalData["GameIconSizePx"]), (self.properties.generalData["GameIconSizePx"])))
+            self.resultBox.setText(self.greetings())
+            self.movieBox.clear()# ENDREGION
+# REGION Selection Phase
+    def selectGame(self):
+        """SELECTION PHASE 1 Once clicked on the desired game pass it to listLinksWorker"""
+        self.linksListWidget.clear()
+
+        # Make resume
+        if self.properties.generalData["loadicons"] == 1:
+            # Throws and out of bounds error when re-searching after selecting a game (no effects notable)
+            self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/_" + self.done[self.str_links[self.listWidget.currentRow()][1]].name +  "_" + str(self.listWidget.currentRow()) + ".png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        else:
+            self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/default.png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))            
+        self.resumeLabel.setText(self.str_titles[self.listWidget.currentRow()])
+        self.resumeLabel.setFont(QFont("Arial", self.properties.generalData["resumefont"]))
+        self.resumeLayout.addWidget(self.resumeIcon)
+        self.resumeLayout.addWidget(self.resumeLabel)
+        self.log.info("USER selected {0}".format(self.str_titles[self.listWidget.currentRow()]))
+
+        # Save the tuple element returned from listLinks
+        # Create and start listLinksWorker thread
+        if self.properties.generalData["loadicons"] == 1:
+            self.linksWorker = listLinksWorker(self.done[self.str_links[self.listWidget.currentRow()][1]], self.str_links[self.listWidget.currentRow()][0])
+        else:
+            self.linksWorker = listLinksWorker(self.done[self.str_links[self.listWidget.currentRow()][1]], self.str_links[self.listWidget.currentRow()][0])
+        self.linksWorker.start()
+        self.linksWorker.done.connect(self.displayLinks)
+
+        self.movieLoading = QMovie(os.path.normpath(os.getcwd() + "/Icons/Loading.gif"))
+        self.movieLoading.setScaledSize(QSize(self.properties.generalData["UIIconSizePx"] * 2, self.properties.generalData["UIIconSizePx"] * 2))
+        self.movieBox.setMovie(self.movieLoading)
+        self.movieLoading.start()
+
+    def displayLinks(self, tupleElement: tuple[list, list]) -> None:
+        """SELECTION PHASE 2 Lists the games link(s) on the right-side box"""
+        self.linksListWidget.clear()
         for k,v in enumerate(tupleElement[0]):
             # Entries
             if tupleElement[1][k] != "- ":
                 item = QListWidgetItem(tupleElement[1][k] + " " + v)
-                if self.properties.data["theme"] == "Dark":
+                if self.properties.generalData["theme"] == "Dark":
                     item.setForeground(QColor("green"))
-                if self.properties.data["theme"] == "Aqua":
+                if self.properties.generalData["theme"] == "Aqua":
                     item.setForeground(QColor("green"))
-                if self.properties.data["theme"] == "Light":
+                if self.properties.generalData["theme"] == "Light":
                     item.setForeground(QColor("blue"))
-                if self.properties.data["theme"] == "Patriotic":
+                if self.properties.generalData["theme"] == "Patriotic":
                     item.setForeground(QColor("white"))
             # Links
             else:
                 item = QListWidgetItem("- " + v)
-                if self.properties.data["theme"] == "Dark":
+                if self.properties.generalData["theme"] == "Dark":
                     item.setForeground(QColor("white"))
-                if self.properties.data["theme"] == "Aqua":
+                if self.properties.generalData["theme"] == "Aqua":
                     item.setForeground(QColor("white"))
-                if self.properties.data["theme"] == "Light":
+                if self.properties.generalData["theme"] == "Light":
                     item.setForeground(QColor("black"))
-                if self.properties.data["theme"] == "Patriotic":
+                if self.properties.generalData["theme"] == "Patriotic":
                     item.setForeground(QColor("green"))
             # Printing links on the rightside box
             self.linksListWidget.addItem(item)
         self.resultBox.setText(self.greetings())
-        self.resultBox.movie = None
-
-    def selectGame(self):
-        """Once game is selected, links will be provided on the right side box"""
-        self.linksListWidget.clear()
-
-        # Make resume
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\" + str(self.listWidget.currentRow()) + ".png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
-        self.resumeLabel.setText(self.infos[0][self.listWidget.currentRow()])
-        self.resumeLabel.setFont(QFont("Arial", self.properties.data["resumefont"]))
-        self.resumeLayout.addWidget(self.resumeIcon)
-        self.resumeLayout.addWidget(self.resumeLabel)
-
-        # Save the tuple element returned from listLinks
-        # Create and start listLinksWorker thread
-        self.linksWorker = listLinksWorker(self.sgd, self.infos[1][0][self.listWidget.currentRow()])
-        self.linksWorker.start()
-        self.linksWorker.done.connect(self.displayLinks)
-        self.movieLoading = QMovie("Icons\\Loading.gif")
-        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
-        self.resultBox.setMovie(self.movieLoading)
-        self.movieLoading.start()
-
-    def outputLink(self, link):
-        # Ads skipping and stuff inside SGD.py
-        # Re-enable links list
-        self.linksListWidget.setDisabled(False)
-        if "http" in link:
-            # If openLinks in config.json is set to 1/True, open the link in the browser
-            if self.properties.data["openLinks"] == 1 and self.properties.data["semiAutoMode"] == 0:
-                self.directBrowser(link)
-
-            # Semi-Automatic mode preference
-            elif self.properties.data["semiAutoMode"] == 1:
-                self.captchaWorker = manualCaptchaWorker()
-                self.captchaWorker.setLink(link)
-                self.captchaWorker.start()
-                self.captchaWorker.done.connect(self.provideFinalLink)
-
-            # Ask the user to copy/open the link
-            elif self.properties.data["openLinks"] == 0:
-                self.linkPopUp("Success!", link)
-
-        else:
-            self.resultBox.setText("Error: The entry you choose is not a link!")
-
-    def provideFinalLink(self, link):
-        if link == "closed":
-            self.resultBox.setText("Error: Closed")
-            return
-        if self.properties.data["openLinks"] == 1:
-            if "magnet" not in link:
-                self.directBrowser(link)
-            else:
-                self.linkPopUp("Success!", link)
-        else:
-            self.linkPopUp("Success!", link)
-
-    def fetchDownloadLink(self):
-        self.movieLoading = QMovie("Icons\\Loading.gif")
-        self.movieLoading.setScaledSize(QSize(self.properties.data["UIIconSizePx"] * 2, self.properties.data["UIIconSizePx"] * 2))
-        self.resultBox.setMovie(self.movieLoading)
+        self.movieBox.clear()# ENDREGION
+# REGION Link Fetching
+    def fetchDownloadLink(self) -> None:
+        """LINK_FETCHING PHASE 1 Passes the selected entry+link to the module's cleaning function"""
+        self.movieLoading = QMovie(os.path.normpath(os.getcwd() + "/Icons/Loading.gif"))
+        self.movieLoading.setScaledSize(QSize(self.properties.generalData["UIIconSizePx"] * 2, self.properties.generalData["UIIconSizePx"] * 2))
+        self.movieBox.setMovie(self.movieLoading)
         self.movieLoading.start()
         try:
             # Create and start cleanLinkWorker thread
-            self.cleanWorker = cleanLinkWorker(self.sgd, self.linksListWidget.selectedItems()[0].text())
+            self.log.info("Cleaning {0}".format(self.linksListWidget.selectedItems()[0].text()))
+            self.cleanWorker = cleanLinkWorker(self.done[self.str_links[self.listWidget.currentRow()][1]], self.linksListWidget.selectedItems()[0].text())
             self.cleanWorker.start()
             self.cleanWorker.done.connect(self.outputLink)
             # Disable links list
@@ -346,61 +471,37 @@ class App():
         except:
             pass
 
-    def setWindowParameters(self):
+    def outputLink(self, link: str):
+        """LINK_FETCHING PHASE 2 link(str) contains the cleaned link"""
+        # Re-enable links list
+        self.linksListWidget.setDisabled(False)
+        self.log.info("Cleaned link: {0}".format(link))
+        if "http" or "magnet" in link:
+            # If openLinks in config.json is set to 1/True, open the link in the browser
+            if self.properties.generalData["openLinks"] == 1:
+                self.directBrowser(link)
+            # Ask the user to copy/open the link
+            elif self.properties.generalData["openLinks"] == 0:
+                self.linkPopUp("Success!", link)
+        else:
+            self.log.warning("Clicked on {0}".format(link))
+            self.resultBox.setText("Error: The entry you choose is not a link!")
+            self.movieBox.clear()# ENDREGION
+# REGION Gui
+    def setWindowParameters(self) -> None:
         # Title of main widget
         self.widget.setWindowTitle("SwitchGamesDownloader")
 
         # Icon of main widget
-        self.widget.setWindowIcon(QIcon("Icons\\Switch.png"))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # Default size of GUI
-        self.widget.resize(self.properties.data["Width"], self.properties.data["Height"])
+        self.widget.resize(int(self.properties.generalData["Width"]), int(self.properties.generalData["Height"]))
 
         # Theme
-        self.widget.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
+        self.widget.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
 
-    def createList(self, value):
-        self.icons = value[0]
-        self.sizes = value[1]
-        self.DownloadIcon()
-        try:
-            if self.properties.data["loadicons"] == 1:
-                for k,v in enumerate(self.infos[0]):
-                    self.listWidget.addItem(QListWidgetItem(QIcon("GameIcons\\" + str(k) + ".png"), str(v)))
-            else:
-                for k,v in enumerate(self.infos[0]):
-                    self.listWidget.addItem(QListWidgetItem(QIcon("GameIcons\\default.png"), str(v)))
-        except TypeError as e:
-            print(e)
-            # No results found error
-            self.alarm("Error", "No results found!")
-        self.listWidget.setIconSize(QSize((self.properties.data["GameIconSizePx"]), (self.properties.data["GameIconSizePx"])))
-        self.resultBox.setText(self.greetings())
-        self.resultBox.movie = None
-
-    def makeInfos(self, value):
-        self.infos = value
-        if self.infos == 1:
-            self.search()
-        if self.properties.data["loadicons"] == 1:
-            # Create and start listIconsWorker thread
-            self.iconWorker = iconGamesWorker(self.sgd)
-            self.iconWorker.start()
-            self.iconWorker.done.connect(self.createList)
-
-    def populateSearchList(self):
-        # This will be populated by search results with icons and game title
-        self.listWidget.clear()
-        self.linksListWidget.clear()
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\default.png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
-        self.resumeLabel.clear()
-        # Create and start listGamesWorker thread
-        self.gamesWorker = listGamesWorker(self.sgd)
-        self.gamesWorker.start()
-        self.gamesWorker.done.connect(self.makeInfos)
-        self.searchButton.setEnabled(True)
-
-    def createLayout(self):
+    def createLayout(self) -> None:
         # Create general layout
         self.mainLayout = QHBoxLayout()
 
@@ -411,29 +512,31 @@ class App():
         self.resumeLayout = QHBoxLayout()
         self.searchLayout.addLayout(self.searchFunctionLayout)
         self.searchLayout.addLayout(self.resumeLayout)
+
         # Add to mainLayout
         self.mainLayout.addLayout(self.listLayout)
         self.mainLayout.addLayout(self.searchLayout)
 
-    def closeWindow(self):
+    def closeWindow(self) -> None:
         exit()
 
-    def preferencesWindow(self):
-        self.p = Preferences()
-        self.p.widget.exec_()
-        self.properties.data = self.p.data
+    def preferencesWindow(self) -> None:
+        self.properties.widget.exec_()
+        # Reload properties
+        self.properties = self.properties.update()
         self.updatePreferences()
 
-    def aboutWindow(self):
+    def aboutWindow(self) -> None:
         self.a = About()
 
-    def updatePreferences(self):
-        self.listWidget.setIconSize(QSize((self.properties.data["GameIconSizePx"]), (self.properties.data["GameIconSizePx"])))
-        self.searchButton.setIconSize(QSize((self.properties.data["UIIconSizePx"]), (self.properties.data["UIIconSizePx"])))
-        self.widget.resize(self.properties.data["Width"], self.properties.data["Height"])
-        self.widget.setStyleSheet(open("Themes\\" + self.properties.data["theme"] + ".css", "r").read())
-
-    def createWidgets(self):
+    def updatePreferences(self) -> None:
+        """Real-time properties application"""
+        self.listWidget.setIconSize(QSize((int(self.properties.generalData["GameIconSizePx"])), (int(self.properties.generalData["GameIconSizePx"]))))
+        self.searchButton.setIconSize(QSize((int(self.properties.generalData["UIIconSizePx"])), (int(self.properties.generalData["UIIconSizePx"]))))
+        self.widget.resize(int(self.properties.generalData["Width"]), int(self.properties.generalData["Height"]))
+        self.widget.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
+    
+    def createWidgets(self) -> None:
         # Widget creation
         self.listWidget = QListWidget()
 
@@ -473,27 +576,30 @@ class App():
 
         # Search Button
         self.searchButton = QPushButton()
-        self.searchButton.setIcon(QIcon("Icons\\WebScraping.png"))
-        self.searchButton.setIconSize(QSize((self.properties.data["UIIconSizePx"]), (self.properties.data["UIIconSizePx"])))
+        self.searchButton.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/WebScraping.png")))
+        self.searchButton.setIconSize(QSize((int(self.properties.generalData["UIIconSizePx"])), (int(self.properties.generalData["UIIconSizePx"]))))
         self.searchButton.setShortcut("Return")
         self.searchFunctionLayout.addWidget(self.searchButton)
 
         # Resume widget
         self.resumeIcon = QLabel()
         self.resumeLabel = QLabel()
-        self.resumeIcon.setPixmap(QPixmap("GameIcons\\default.png").scaled(self.properties.data["GameIconSizePx"] * 2,self.properties.data["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
+        self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/default.png")).scaled(int(self.properties.generalData["GameIconSizePx"]) * 2,int(self.properties.generalData["GameIconSizePx"]) * 2, Qt.KeepAspectRatio))
         self.resumeLayout.addWidget(self.resumeIcon)
         self.resumeLayout.addWidget(self.resumeLabel)
 
         # Final Output Box
         self.resultBox = QLabel()
+        self.movieBox = QLabel()
 
         # Add random greetings
         self.resultBox.setText(self.greetings())
+        self.movieBox.setText("")
 
         # Bottom-right list with all download links
         self.linksListWidget = QListWidget()
         self.searchLayout.addWidget(self.linksListWidget)
+        self.searchLayout.addWidget(self.movieBox)
         self.searchLayout.addWidget(self.resultBox)
 
         # Add listWidget to the main layout
@@ -510,7 +616,7 @@ class App():
         self.linksListWidget.itemSelectionChanged.connect(self.fetchDownloadLink)
         self.quit.triggered.connect(self.closeWindow)
         self.preferencesMenu.triggered.connect(self.preferencesWindow)
-        self.about.triggered.connect(self.aboutWindow)
+        self.about.triggered.connect(self.aboutWindow)# ENDREGION
 
 if __name__ == "__main__":
     App(True)

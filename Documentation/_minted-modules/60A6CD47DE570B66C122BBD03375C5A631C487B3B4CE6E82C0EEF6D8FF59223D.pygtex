@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{options} \PYG{o}{=} \PYG{n}{Options}\PYG{p}{()}
+
+            \PYG{c+c1}{\PYGZsh{} Headless + silent selenium config}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{options}\PYG{o}{.}\PYG{n}{add\PYGZus{}experimental\PYGZus{}option}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}detach\PYGZdq{}}\PYG{p}{,} \PYG{k+kc}{True}\PYG{p}{)}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{options}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}\PYGZhy{}\PYGZhy{}headless\PYGZdq{}}\PYG{p}{)}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{options}\PYG{o}{.}\PYG{n}{add\PYGZus{}argument}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}log\PYGZhy{}level=1\PYGZsq{}}\PYG{p}{)}
+
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{browser} \PYG{o}{=} \PYG{n}{Chrome}\PYG{p}{(}
+                \PYG{n}{chrome\PYGZus{}options}\PYG{o}{=}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{options}\PYG{p}{,}
+                \PYG{n}{executable\PYGZus{}path}\PYG{o}{=}\PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()} \PYG{o}{+} \PYG{l+s+s2}{\PYGZdq{}/chromedriver.exe\PYGZdq{}}
+                \PYG{p}{)}
+\end{Verbatim}

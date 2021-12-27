@@ -4,10 +4,10 @@ from PyQt5.QtCore import *
 
 class listGamesWorker(QThread):
     """Second thread called, provides the list of games from the searched page"""
-    done = pyqtSignal(tuple)
-    def __init__(self, sgd):
+    done = pyqtSignal(list)
+    def __init__(self, module):
         super().__init__()
-        self.sgd = sgd
+        self.module = module
         
     def run(self):
-        self.done.emit(self.sgd.listGames())
+        self.done.emit([self.module.listGames(), self.module])

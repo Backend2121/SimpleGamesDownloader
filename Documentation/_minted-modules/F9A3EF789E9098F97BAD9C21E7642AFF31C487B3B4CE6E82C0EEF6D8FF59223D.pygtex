@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+            \PYG{k}{def} \PYG{n+nf}{cleanLink}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{link}\PYG{p}{:} \PYG{n+nb}{str}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n+nb}{str}\PYG{p}{:}
+                \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Called by cleanLinkWorker.py}
+
+\PYG{l+s+sd}{                Instantiated in LINK\PYGZus{}FETCHING PHASE 1 of gui.py\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\end{Verbatim}

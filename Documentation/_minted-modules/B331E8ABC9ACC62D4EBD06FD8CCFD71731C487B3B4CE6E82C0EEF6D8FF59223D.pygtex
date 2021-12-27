@@ -1,0 +1,8 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+            \PYG{k}{def} \PYG{n+nf}{searchGame}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{game}\PYG{p}{:} \PYG{n+nb}{str}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k+kc}{None}\PYG{p}{:}
+                \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Called by searchGamesWorker.py}
+
+\PYG{l+s+sd}{                Instantiated in SEARCH PHASE 1 of gui.py\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+                \PYG{c+c1}{\PYGZsh{} Use this function to reach the website through a proxy}
+                \PYG{c+c1}{\PYGZsh{} if needed or use it as a set method for self.toSearch}
+\end{Verbatim}
