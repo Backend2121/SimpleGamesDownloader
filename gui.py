@@ -4,6 +4,7 @@ import importlib
 import webbrowser
 import random
 import sys
+from datetime import datetime
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -36,9 +37,10 @@ class App():
             self.modulesSettings = []
 
             # Define logger
+            
             self.log = logging.getLogger("MAIN_Logger")
-            logPath = os.path.normpath(os.getcwd() + "//ReplaceWithTime.log")
-            logging.basicConfig(filename=logPath , filemode='a', format='%(levelname)s - %(name)s - "%(asctime)s": %(message)s', level="INFO")
+            self.logPath = os.path.normpath(os.getcwd() + "//Logs//{0}.log".format(datetime.now()))
+            logging.basicConfig(filename=self.logPath , filemode='a', format='%(levelname)s - %(name)s - "%(asctime)s": %(message)s', level="INFO")
 
             # Get general info of the running machine
             self.log.info("PYTHON VERSION: {0}".format(sys.version))
@@ -114,7 +116,7 @@ class App():
         # Create buttons
         download = QPushButton(' Download')
         close = QPushButton(' Close')
-        download.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/DownloadIcon.png"))) #REPLACE WITH DOWNLOAD ICON
+        download.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/DownloadIcon.png")))
 
         # Assign buttons to QMessageBox
         message.addButton(close, QMessageBox.NoRole)
@@ -154,8 +156,10 @@ class App():
         self.close.setEnabled(False)
         # Start downloader thread
         downloader = worker()
+        downloader.logPath = self.logPath
         downloader.updated.connect(self.updatePBar)
         downloader.start()
+        self.log.info("Chromedriver downloader worker started")
 
         # Start window
         self.CDDialog.exec_()
@@ -163,6 +167,7 @@ class App():
     def updatePBar(self, value: int) -> None:
         """Update progress bar using the value passed in (0-100)"""
         self.pbar.setValue(value)
+        self.log.info("Download percentage: {0}".format(value))
         if (value >= 99):
             self.close.setEnabled(True)
             self.CDDialog.close()# ENDREGION
@@ -183,7 +188,12 @@ class App():
         if os.path.isfile("chromedriver.exe"):
             return
         else:
-            self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
+            if sys.platform == "WIN32":
+                self.log.info("Starting chromdriver downloader for {0}".format(sys.platform))
+                self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
+            else:
+                self.log.info("Unable to automatically download chromedriver for {0}".format(sys.platform))
+                self.alarm("WARNING", "You do not have the chromedriver in the main directory of the script\nAutomatic download is not supported for Linux/MacOS\nYou must download it manually!")
 
     def linkPopUp(self, title: str, label: str) -> None:
         """Create a pop-up widget used to copy informations"""

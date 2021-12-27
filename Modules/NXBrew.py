@@ -28,7 +28,7 @@ chrome_options.add_argument('log-level=1')
 
 class Settings():
     """SGD Settings"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "NXBrew"
         self.logPath = os.path.normpath(os.getcwd() + "//ReplaceWithTime.log")
         # Load config.json file
