@@ -52,7 +52,7 @@ class App():
                     f = f.replace(".py", "")
                     imported = importlib.import_module("." + f, "Modules")
                     x = imported.Settings()
-                    x.logPath = logPath
+                    x.logPath = self.logPath
                     self.modulesSettings.append(imported.Settings())
 
             self.log.info("Loaded {0} module(s)".format(self.modulesSettings))
