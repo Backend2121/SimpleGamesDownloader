@@ -114,7 +114,7 @@ class module:
             print("Error: " + e)
 
 
-    def listGames(self) -> tuple[list, list]:
+    def listGames(self) -> "tuple[list, list]":
         """Gets all games listed in the first page of results
 
         tuple[0] = Games's Titles

@@ -112,7 +112,7 @@ class module:
         self.toSearch = game
         return
 
-    def cropImage(self, image: str, size: tuple[int, int]) -> None:
+    def cropImage(self, image: str, size: "tuple[int, int]") -> None:
         # NEVER CALLED IN THIS EXAMPLE
         """Selenium screenshots the screen at a default resolution of 800x600 if "--headless" is used
 
@@ -137,7 +137,7 @@ class module:
         except SystemError as e:
             self.log.error("Error in cropping image: {0}".format(e))
 
-    def listGames(self) -> tuple[list, list]:
+    def listGames(self) -> "tuple[list, list]":
         """Called by listGamesWorker.py
         
         Instantiated in SEARCH PHASE 2 of gui.py
@@ -175,7 +175,7 @@ class module:
                     break
         return titlesLinks
 
-    def listIcons(self) -> tuple[list, list]:
+    def listIcons(self) -> "tuple[list, list]":
         """Called by iconGamesWorker.py
         
         Instantiated in SEARCH PHASE 3 of gui.py"""
@@ -190,7 +190,7 @@ class module:
         time.sleep(10)
         self.browser.close()
 
-    def listLinks(self, link: str) -> tuple[list, list]:
+    def listLinks(self, link: str) -> "tuple[list, list]":
         """Called by listLinksWorker.py
         
         Instantiated in SELECTION PHASE 1 of gui.py"""

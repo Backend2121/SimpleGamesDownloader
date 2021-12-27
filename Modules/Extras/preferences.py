@@ -138,7 +138,7 @@ class Preferences():
         
         self.widget.close()
 
-    def serialize(self, m: module, v: dict[str, dict]) -> None:
+    def serialize(self, m: module, v: "dict[str, dict]") -> None:
         """Serialize m.data into a dict"""
         v[m.name] = {}
         for entry in m.data:

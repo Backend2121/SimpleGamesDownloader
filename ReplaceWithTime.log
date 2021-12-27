@@ -257,3 +257,7 @@ INFO - MAIN_Logger - "2021-12-25 18:21:03,119": Cleaning Google Drive /go.php?u=
 INFO - NXBrew_Logger - "2021-12-25 18:21:27,007": Cleaned link: https://cutdl.xyz/ZD0WCVGp
 INFO - MAIN_Logger - "2021-12-25 18:21:27,007": Cleaned link: https://cutdl.xyz/ZD0WCVGp
 INFO - MAIN_Logger - "2021-12-25 18:21:28,593": Opening browser to https://cutdl.xyz/ZD0WCVGp
+INFO - MAIN_Logger - "2021-12-27 15:00:05,786": PYTHON VERSION: 3.8.10 (default, Nov 26 2021, 20:14:08) 
+[GCC 9.3.0]
+INFO - MAIN_Logger - "2021-12-27 15:00:05,786": PLATFORM: linux
+INFO - MAIN_Logger - "2021-12-27 15:00:06,070": Loaded [<Modules.TemplateModule.Settings object at 0x7fd7ee8b88b0>, <Modules.NXBrew.Settings object at 0x7fd7ee8b8820>, <Modules.WOWRoms.Settings object at 0x7fd7ee8b8850>] module(s)

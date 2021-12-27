@@ -423,7 +423,7 @@ class App():
         self.movieBox.setMovie(self.movieLoading)
         self.movieLoading.start()
 
-    def displayLinks(self, tupleElement: tuple[list, list]) -> None:
+    def displayLinks(self, tupleElement: "tuple[list, list]") -> None:
         """SELECTION PHASE 2 Lists the games link(s) on the right-side box"""
         self.linksListWidget.clear()
         for k,v in enumerate(tupleElement[0]):
