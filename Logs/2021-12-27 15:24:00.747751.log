@@ -1,4 +1,0 @@
-INFO - MAIN_Logger - "2021-12-27 15:24:00,748": PYTHON VERSION: 3.8.10 (default, Nov 26 2021, 20:14:08) 
-[GCC 9.3.0]
-INFO - MAIN_Logger - "2021-12-27 15:24:00,748": PLATFORM: linux
-INFO - MAIN_Logger - "2021-12-27 15:24:00,976": Loaded [<Modules.TemplateModule.Settings object at 0x7f506705e8e0>, <Modules.NXBrew.Settings object at 0x7f506705e850>, <Modules.WOWRoms.Settings object at 0x7f506705e880>] module(s)
