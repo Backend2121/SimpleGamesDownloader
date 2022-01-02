@@ -1,3 +1,5 @@
+# TO BE USED ONLY TO DOWNLOAD LEGALLY BOUGHT GAMES
+
 import os
 import json
 from typing import Tuple
