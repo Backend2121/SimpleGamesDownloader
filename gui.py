@@ -39,9 +39,11 @@ class App():
             # Define logger
             
             self.log = logging.getLogger("MAIN_Logger")
+            
             # Create Logs folder if not present
             if not (os.path.isdir(os.path.normpath(os.getcwd() + "//Logs"))):
                 os.mkdir(os.path.normpath(os.getcwd() + "//Logs"))
+            
             self.logPath = os.path.normpath(os.getcwd() + "//Logs//{0}.log".format(time.strftime("%Y%m%d-%H%M%S")))
             logging.basicConfig(filename=self.logPath , filemode='a', format='%(levelname)s - %(name)s - "%(asctime)s": %(message)s', level="INFO")
 
