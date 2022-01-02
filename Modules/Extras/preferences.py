@@ -5,8 +5,6 @@ from PyQt5.QtCore import *
 import json
 import os
 
-from Modules.TemplateModule import module
-
 class Preferences():
     def __init__(self, moduleList: list) -> None:
         self.moduleList = moduleList
@@ -138,11 +136,11 @@ class Preferences():
         
         self.widget.close()
 
-    def serialize(self, m: module, v: "dict[str, dict]") -> None:
+    def serialize(self, module, v: "dict[str, dict]") -> None:
         """Serialize m.data into a dict"""
-        v[m.name] = {}
-        for entry in m.data:
-            v[m.name][entry] = m.data[entry]
+        v[module.name] = {}
+        for entry in module.data:
+            v[module.name][entry] = module.data[entry]
 
     def stateChange(self) -> None:
         if self.loadIcons.isChecked(): self.generalData["loadicons"] = 1

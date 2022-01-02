@@ -218,8 +218,10 @@ class App():
         # Create buttons
         copy = QPushButton('Copy')
         browser = QPushButton('Open')
+
         # Button for the auto download (grayed by default)
         download = QPushButton('Download')
+        download.setEnabled(False)
 
         # Assign buttons to QMessageBox
         self.message.addButton(copy, QMessageBox.YesRole)
@@ -509,7 +511,7 @@ class App():
 # REGION Gui
     def setWindowParameters(self) -> None:
         # Title of main widget
-        self.widget.setWindowTitle("SwitchGamesDownloader")
+        self.widget.setWindowTitle("SGD")
 
         # Icon of main widget
         self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))

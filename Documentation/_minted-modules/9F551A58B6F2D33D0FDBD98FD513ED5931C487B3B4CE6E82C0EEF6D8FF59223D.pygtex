@@ -1,6 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-            \PYG{k}{def} \PYG{n+nf}{stateChange}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{k+kc}{None}\PYG{p}{:}
-                \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Register changes to data array\PYGZdq{}\PYGZdq{}\PYGZdq{}}
-                \PYG{k}{if} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{enableThis}\PYG{o}{.}\PYG{n}{isChecked}\PYG{p}{():} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{data}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}isEnabled\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{1}
-                \PYG{k}{else}\PYG{p}{:} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{data}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}isEnabled\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{0}
-\end{Verbatim}
