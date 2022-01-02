@@ -220,7 +220,7 @@ class App():
         browser = QPushButton('Open')
 
         # Button for the auto download (grayed by default)
-        download = QPushButton('Download')
+        download = QPushButton('Download(WIP)')
         download.setEnabled(False)
 
         # Assign buttons to QMessageBox
