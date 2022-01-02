@@ -1,10 +1,10 @@
 import os
 import logging
 import importlib
+import time
 import webbrowser
 import random
 import sys
-from datetime import datetime
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -39,7 +39,10 @@ class App():
             # Define logger
             
             self.log = logging.getLogger("MAIN_Logger")
-            self.logPath = os.path.normpath(os.getcwd() + "//Logs//{0}.log".format(datetime.now()))
+            # Create Logs folder if not present
+            if not (os.path.isdir(os.path.normpath(os.getcwd() + "//Logs"))):
+                os.mkdir(os.path.normpath(os.getcwd() + "//Logs"))
+            self.logPath = os.path.normpath(os.getcwd() + "//Logs//{0}.log".format(time.strftime("%Y%m%d-%H%M%S")))
             logging.basicConfig(filename=self.logPath , filemode='a', format='%(levelname)s - %(name)s - "%(asctime)s": %(message)s', level="INFO")
 
             # Get general info of the running machine
@@ -155,6 +158,7 @@ class App():
         self.CDDialog.addButton(self.close, QMessageBox.YesRole)
         self.close.setEnabled(False)
         # Start downloader thread
+        self.prevValue = 0
         downloader = worker()
         downloader.logPath = self.logPath
         downloader.updated.connect(self.updatePBar)
@@ -167,7 +171,9 @@ class App():
     def updatePBar(self, value: int) -> None:
         """Update progress bar using the value passed in (0-100)"""
         self.pbar.setValue(value)
-        self.log.info("Download percentage: {0}".format(value))
+        if self.prevValue != value:
+            self.prevValue = value
+            self.log.info("Download percentage: {0}".format(value))
         if (value >= 99):
             self.close.setEnabled(True)
             self.CDDialog.close()# ENDREGION
@@ -188,7 +194,7 @@ class App():
         if os.path.isfile("chromedriver.exe"):
             return
         else:
-            if sys.platform == "WIN32":
+            if sys.platform == "win32":
                 self.log.info("Starting chromdriver downloader for {0}".format(sys.platform))
                 self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
             else:
