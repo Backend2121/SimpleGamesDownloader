@@ -30,7 +30,7 @@ class About(QWindow):
         self.widget.setWindowIcon(QIcon("Icons\\Switch.png"))
 
         # Labels
-        self.titleLabel = QLabel("Universal Games Downloader")
+        self.titleLabel = QLabel("SGD")
         self.versionLabel = QLabel("Version: " + self.version["version"])
         self.descriptionLabel = QLabel("Modules update!")
         
@@ -75,4 +75,4 @@ class About(QWindow):
         webbrowser.open("https://www.reddit.com/user/Sbigioduro")
     
     def openBrowserPatreon(self):
-        webbrowser.open("https://patreon.com/")
+        webbrowser.open("https://www.patreon.com/Backend2121")

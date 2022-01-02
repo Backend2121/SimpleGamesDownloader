@@ -39,7 +39,7 @@ class App():
             # Define logger
             
             self.log = logging.getLogger("MAIN_Logger")
-            
+
             # Create Logs folder if not present
             if not (os.path.isdir(os.path.normpath(os.getcwd() + "//Logs"))):
                 os.mkdir(os.path.normpath(os.getcwd() + "//Logs"))
@@ -70,6 +70,7 @@ class App():
             self.checkUpdates()
             self.checkChromeDriver()
             self.app.exec_()
+
 # REGION Pop-up Boxes
     def alarm(self, title: str, label: str) -> None:
         """Used to deliver info/errors to the user"""
