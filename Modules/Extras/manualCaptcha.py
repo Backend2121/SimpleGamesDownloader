@@ -11,13 +11,13 @@ class browser():
     def __init__(self):
         # Load config.json file
         with open("config.json",) as f:
-            self.data = json.load(f)
+            self.data = json.load(f)["SGD"]
             f.close()
         self.options = Options()
         self.options.add_argument("user-agent=Generic")
         self.options.add_argument("disable-popup-blocking")
-        if self.data["adBlock"] == 1 or self.data["adBlock"] == "True": self.options.add_extension(os.getcwd() + "\\Modules\\adblock.crx")
-        self.driver = webdriver.Chrome(executable_path=os.getcwd() + "\\Chromedriver.exe", chrome_options=self.options)
+        if self.data["adBlock"] == 1 or self.data["adBlock"] == "True": self.options.add_extension(os.path.normpath(os.getcwd() + "/Modules/adblock.crx"))
+        self.driver = webdriver.Chrome(executable_path=os.getcwd() + "/chromedriver", chrome_options=self.options)
 
     def start(self, link):
         self.driver.get(link)

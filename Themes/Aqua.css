@@ -65,3 +65,30 @@ QMessageBox {
 QProgressBar {
     color: azure;
 }
+
+QTabWidget::pane {
+    border: 1px solid rgb(47, 79, 79);
+    top:-1px; 
+    background: rgb(47, 79, 79);
+} 
+  
+QTabBar::tab {
+    background: rgb(39, 66, 66);
+    border: 1px solid rgb(29, 29, 29);
+    padding: 5px;
+    color: whitesmoke;
+} 
+  
+QTabBar::tab:selected { 
+    background: rgb(47, 79, 79);
+    margin-bottom: -1px; 
+}
+
+QTabBar::scroller {
+    width: 25px;
+}
+
+QTabBar QToolButton {
+    background-color: rgba(47, 79, 79, 1);
+    border:0;
+}

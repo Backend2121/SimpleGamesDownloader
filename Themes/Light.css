@@ -28,3 +28,30 @@ QMenu::item::selected {
 QProgressBar {
     color: black;
 }
+
+QTabWidget::pane {
+    border: 1px solid rgb(226, 226, 226);
+    top:-1px; 
+    background: rgb(226, 226, 226);
+} 
+  
+QTabBar::tab {
+    background: rgb(226, 226, 226);
+    border: 1px solid rgb(226, 226, 226);
+    padding: 5px;
+    color: black;
+} 
+  
+QTabBar::tab:selected { 
+    background: rgb(216, 216, 216);
+    margin-bottom: -1px; 
+}
+
+QTabBar::scroller {
+    width: 25px;
+}
+
+QTabBar QToolButton {
+    background-color: rgba(226, 226, 226, 1);
+    border:0;
+}

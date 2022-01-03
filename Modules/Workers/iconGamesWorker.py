@@ -4,10 +4,10 @@ from PyQt5.QtCore import *
 
 class iconGamesWorker(QThread):
     """Third thread called, provides the icons for the games listed"""
-    done = pyqtSignal(tuple)
-    def __init__(self, sgd):
+    done = pyqtSignal(list)
+    def __init__(self, module):
         super().__init__()
-        self.sgd = sgd
+        self.module = module
         
     def run(self):
-        self.done.emit(self.sgd.listIcons())
+        self.done.emit([self.module.listIcons(), self.module])

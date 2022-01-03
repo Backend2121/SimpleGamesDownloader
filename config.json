@@ -1,1 +1,12 @@
-{"Width": 1920, "Height": 1080, "GameIconSizePx": 100, "UIIconSizePx": 20, "theme": "Dark", "loadicons": 1, "resumefont": 15, "openLinks": 0, "semiAutoMode": 0, "adBlock": 0}
+{
+  "General": {
+    "Width": 1920,
+    "Height": 1080,
+    "GameIconSizePx": 100,
+    "UIIconSizePx": 20,
+    "theme": "Dark",
+    "resumefont": 15,
+    "loadicons": 1,
+    "openLinks": 0
+  }
+}
