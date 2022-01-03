@@ -3,7 +3,9 @@
 
 ---
 
-[nxbrew.com](nxbrew.com) is a website, accessible only using a proxy, where the majority of games for the Nintendo Switch are stored, this script will ask you for the game to be searched in the aformentioned website then tunnel your request through [hide.me](hide.me) providing you with the final download link skipping all those filthy scam pages and pop-up tabs.
+This software is a GUI able to use so called 'modules' to automatically scrape websites and provide you with a link without the hassle of having to fight against all the ads or things like that
+
+If you want to learn how to build your own module for a website of your choice head to the "development" branch of this repo
 
 ---
 
@@ -31,3 +33,4 @@ https://discord.com/invite/WTrCtvyPke
 * Themes
 * ChromeDriver auto-downloader
 * MultiThreading
+* Module approach
