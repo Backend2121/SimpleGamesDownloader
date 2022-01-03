@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from Modules.Extras.Prettifier import *
 from Modules.Extras import manualCaptcha
 from Modules.Workers.adBlockerDownloaderWorker import adBlockerDownloaderWorker
 
@@ -148,7 +147,6 @@ class module():
             self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
         except:
             self.log.fatal("NO WEBDRIVER FOUND EXITING!")
-            Error("Webdriver not found, please make sure you have it inside this script's folder!")
 
         self.log.info("INITIALIZED {0}".format(self.name))
 
