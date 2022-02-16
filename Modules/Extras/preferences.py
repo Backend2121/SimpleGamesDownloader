@@ -4,10 +4,13 @@ from PyQt5.QtCore import *
 
 import json
 import os
+import logging
 
 class Preferences():
-    def __init__(self, moduleList: list) -> None:
+    def __init__(self, moduleList: list, logger: logging.Logger, logPath: str) -> None:
         self.moduleList = moduleList
+        self.log = logger
+        self.logPath = logPath
         # Load gui configs
         with open("config.json",) as f:
             try:
@@ -45,7 +48,7 @@ class Preferences():
         self.folder = QTabWidget()
 
         # Icon of widget
-        self.widget.setWindowIcon(QIcon("Icons\\Switch.png"))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # General close button
         self.ok = QPushButton("Close")
@@ -79,6 +82,9 @@ class Preferences():
         self.themes = QComboBox()
         self.themes.addItems(["Light", "Dark", "Aqua", "Patriotic"])
 
+        # Button
+        self.clearLogsButton = QPushButton("Clear Logs Folder")
+
         # Assign to form layout
         self.form.addRow("Theme", self.themes)
         self.form.addRow("Width", self.widthTextBox)
@@ -87,7 +93,8 @@ class Preferences():
         self.form.addRow("UI Icon Size Px", self.UIIconSizePxTextBox)
         self.form.addRow("Resume font size", self.ResumefontsizeTextBox)
         self.form.addRow("Load icons", self.loadIcons)
-        self.form.addRow("Always open link",self.openLinks)
+        self.form.addRow("Always open link", self.openLinks)
+        self.form.addRow("", self.clearLogsButton)
 
         # Self-assign config
         self.widthTextBox.setText(str(self.generalData["Width"]))
@@ -108,6 +115,7 @@ class Preferences():
         self.ResumefontsizeTextBox.textChanged.connect(self.stateChange)
         self.loadIcons.stateChanged.connect(self.stateChange)
         self.openLinks.stateChanged.connect(self.stateChange)
+        self.clearLogsButton.clicked.connect(self.clearLogs)
 
 # ENDREGION
         # Add general tab
@@ -143,6 +151,7 @@ class Preferences():
             v[module.name][entry] = module.data[entry]
 
     def stateChange(self) -> None:
+        self.log.info("Updating general settings")
         if self.loadIcons.isChecked(): self.generalData["loadicons"] = 1
         else: self.generalData["loadicons"] = 0
 
@@ -170,6 +179,15 @@ class Preferences():
         
         # Theme changer
         self.generalData["theme"] = self.themes.currentText()
+
+    def clearLogs(self):
+        self.log.info("Clearing logs")
+        logs = os.listdir(os.path.normpath(os.getcwd() + "/Logs/"))
+        for log in logs:
+            if os.path.normpath(os.getcwd() + "/Logs/{0}".format(log)) != self.logPath:
+                print(log)
+                print(self.logPath)
+                os.remove(os.path.normpath(os.getcwd() + "/Logs/{0}".format(log)))
 
     def bool(self, line) -> bool:
         """Returns 1 or 0 depending on True/False from config.json"""

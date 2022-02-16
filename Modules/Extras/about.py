@@ -47,6 +47,10 @@ class About(QWindow):
         self.patreonButton.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Patreon.png")))
         self.patreonButton.setIconSize(QSize(20,20))
 
+        self.youtubeButton = QPushButton(" Youtube")
+        self.youtubeButton.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Youtube.png")))
+        self.youtubeButton.setIconSize(QSize(20,20))
+
         # Add to mainLayout
         self.mainLayout.addWidget(self.titleLabel)
         self.mainLayout.addWidget(self.versionLabel)
@@ -54,6 +58,7 @@ class About(QWindow):
         self.mainLayout.addWidget(self.discordButton)
         self.mainLayout.addWidget(self.redditButton)
         self.mainLayout.addWidget(self.patreonButton)
+        self.mainLayout.addWidget(self.youtubeButton)
 
         # Set main Layout
         self.widget.setLayout(self.mainLayout)
@@ -65,6 +70,8 @@ class About(QWindow):
         self.discordButton.clicked.connect(self.openBrowserDiscord)
         self.redditButton.clicked.connect(self.openBrowserReddit)
         self.patreonButton.clicked.connect(self.openBrowserPatreon)
+        self.youtubeButton.clicked.connect(self.openBrowserYoutube)
+
         # Show window
         self.widget.show()
 
@@ -76,3 +83,6 @@ class About(QWindow):
     
     def openBrowserPatreon(self):
         webbrowser.open("https://www.patreon.com/Backend2121")
+    
+    def openBrowserYoutube(self):
+        webbrowser.open("https://www.youtube.com/channel/UCW2JQJs_R3O_I937yxicT9A")
