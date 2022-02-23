@@ -386,7 +386,6 @@ class App():
         """SEARCH PHASE 4 Lists all the titles (+ icons) on the left and resets the state of the GUI"""
         self.str_titles = []
         self.str_links = []
-        # Add condition to disable this function
         if self.properties.generalData["loadicons"] == 1:
             self.log.info("Executing PHASE 4 with: {0} module".format(value[1].name))
             self.icons = value[0][0]
@@ -432,6 +431,7 @@ class App():
         self.resumeLabel.setFont(QFont("Arial", self.properties.generalData["resumefont"]))
         self.resumeLayout.addWidget(self.resumeIcon)
         self.resumeLayout.addWidget(self.resumeLabel)
+        
         self.log.info("USER selected {0}".format(self.str_titles[self.listWidget.currentRow()]))
 
         # Save the tuple element returned from listLinks
