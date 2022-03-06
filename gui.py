@@ -311,6 +311,7 @@ class App():
                     if s.name == f:
                         if s.enableThis.isChecked():
                             modules.append(imported.module())
+
         self.listSearchWorkers = []
         self.listGamesWorkers = []
         self.listIconsWorkers = []
@@ -379,7 +380,7 @@ class App():
             self.resultBox.setText("Finalized search with " + str(len(self.done)) + "/" + str(self.pending) + "module(s)")
             return False
         else:
-            self.resultBox.setText("Finalized search with all mudles!")
+            self.resultBox.setText("Finalized search with all modules!")
             return True
 
     def createList(self, value):
@@ -423,7 +424,7 @@ class App():
 
         # Make resume
         if self.properties.generalData["loadicons"] == 1:
-            # Throws and out of bounds error when re-searching after selecting a game (no effects notable)
+            # Throws and out of bounds error when re-searching after selecting a game
             self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/_" + self.done[self.str_links[self.listWidget.currentRow()][1]].name +  "_" + str(self.listWidget.currentRow()) + ".png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
         else:
             self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/default.png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))            
