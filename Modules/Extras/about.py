@@ -27,7 +27,7 @@ class About(QWindow):
         self.widget.resize(600,200)
         self.widget.setWindowTitle("About")
         # Icon of widget
-        self.widget.setWindowIcon(QIcon("Icons\\Switch.png"))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # Labels
         self.titleLabel = QLabel("SGD")
@@ -51,6 +51,11 @@ class About(QWindow):
         self.youtubeButton.setIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Youtube.png")))
         self.youtubeButton.setIconSize(QSize(20,20))
 
+        # BTC Address
+        self.BTCAddress = QLabel()
+        self.BTCAddress.setAlignment(Qt.AlignCenter)
+        self.BTCAddress.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/Icons/PLEASECHANGEMEEEEEEE.png")))
+
         # Add to mainLayout
         self.mainLayout.addWidget(self.titleLabel)
         self.mainLayout.addWidget(self.versionLabel)
@@ -59,6 +64,7 @@ class About(QWindow):
         self.mainLayout.addWidget(self.redditButton)
         self.mainLayout.addWidget(self.patreonButton)
         self.mainLayout.addWidget(self.youtubeButton)
+        self.mainLayout.addWidget(self.BTCAddress)
 
         # Set main Layout
         self.widget.setLayout(self.mainLayout)
