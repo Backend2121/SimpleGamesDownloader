@@ -41,7 +41,8 @@ class Settings():
                 self.data = {
                     "isEnabled": 1,
                     "semiAutoMode": 0,
-                    "adBlock": 1
+                    "adBlock": 0,
+                    "useProxy": 1
                 }
         # Widget
         self.widget = QWidget()
@@ -62,25 +63,30 @@ class Settings():
         self.semiAuto = QCheckBox("Semi-auto mode")
         self.adBlocker = QCheckBox("AdBlocker")
         self.enableThis = QCheckBox("Enable module")
+        self.useProxy = QCheckBox("Use Proxy")
 
         # Assign to layout
         self.tickBoxes.addWidget(self.enableThis, 0, 0)
         self.tickBoxes.addWidget(self.adBlocker, 1, 0)
         self.tickBoxes.addWidget(self.semiAuto, 2, 0)
+        self.tickBoxes.addWidget(self.useProxy, 3, 0)
 
         # Self-apply config.json
         self.semiAuto.setChecked(bool(self.data["semiAutoMode"]))
         self.adBlocker.setChecked(bool(self.data["adBlock"]))
         self.enableThis.setChecked(bool(self.data["isEnabled"]))
+        self.useProxy.setChecked(bool(self.data["useProxy"]))
 
         # Set tooltips 
         self.semiAuto.setToolTip("ON: The user will be asked to solve the Captcha, once solved the script will continue on it's own<br>OFF: The program will only reach the Captcha page, you will need to continue on your own")
         self.adBlocker.setToolTip("ON: Disables intrusive ads ONLY in Captcha page<br>OFF: Renders ALL the ads in the Captcha page<br>Personal Note: Leave this unchecked as ads supports the website's owner(s)")
+        self.useProxy.setToolTip("ON: Use hide.me as proxy to access NXBrew.com in blocked regions<br>OFF: Bypass hide.me's proxy if you can access this website directly")
 
         # Define listeners
         self.semiAuto.stateChanged.connect(self.stateChange)
         self.adBlocker.stateChanged.connect(self.stateChange)
         self.enableThis.stateChanged.connect(self.stateChange)
+        self.useProxy.stateChanged.connect(self.stateChange)
 
     def stateChange(self):
         if self.semiAuto.isChecked(): self.data["semiAutoMode"] = 1
@@ -88,6 +94,9 @@ class Settings():
 
         if self.enableThis.isChecked(): self.data["isEnabled"] = 1
         else: self.data["isEnabled"] = 0
+
+        if self.useProxy.isChecked(): self.data["useProxy"] = 1
+        else: self.data["useProxy"] = 0
 
         if self.adBlocker.isChecked():
             self.data["adBlock"] = 1

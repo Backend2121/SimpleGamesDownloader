@@ -1,6 +1,5 @@
 # TO BE USED ONLY TO DOWNLOAD LEGALLY BOUGHT GAMES
 
-from turtle import title
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
