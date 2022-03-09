@@ -1,1 +1,26 @@
-{"General": {"Width": 1920, "Height": 1080, "GameIconSizePx": 100, "UIIconSizePx": 20, "theme": "Dark", "resumefont": 15, "loadicons": 1, "openLinks": 0}, "HexRom": {"isEnabled": 1}, "NXBrew": {"isEnabled": 1, "semiAutoMode": 0, "adBlock": 0, "useProxy": 1}, "WowRoms": {"isEnabled": 1, "platform": 26, "timeout": 10}}
+{
+  "General": {
+    "Width": 1920,
+    "Height": 1080,
+    "GameIconSizePx": 100,
+    "UIIconSizePx": 20,
+    "theme": "Dark",
+    "resumefont": 15,
+    "loadicons": 1,
+    "openLinks": 0
+  },
+  "HexRom": {
+    "isEnabled": 1
+  },
+  "NXBrew": {
+    "isEnabled": 1,
+    "semiAutoMode": 0,
+    "adBlock": 0,
+    "useProxy": 1
+  },
+  "WowRoms": {
+    "isEnabled": 1,
+    "platform": 26,
+    "timeout": 10
+  }
+}

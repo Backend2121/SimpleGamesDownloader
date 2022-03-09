@@ -195,14 +195,30 @@ class App():
 
     def checkChromeDriver(self) -> None:
         if os.path.isfile("chromedriver.exe"):
-            return
-        else:
-            if sys.platform == "win32":
-                self.log.info("Starting chromdriver downloader for {0}".format(sys.platform))
-                self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
+            # Check currently installed version and copare it to the one saved in the config.json
+            v = os.popen('reg query "HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon" /v version').read()
+            v = v.replace(" ", "")
+            start = v.find("REG_SZ")
+            v = v.replace("REG_SZ", "")
+            end = v.rfind(".")
+            if self.properties.version["CDV"] in v[start:end]:
+                return
             else:
-                self.log.info("Unable to automatically download chromedriver for {0}".format(sys.platform))
-                self.alarm("WARNING", "You do not have the chromedriver in the main directory of the script\nAutomatic download is not supported for Linux/MacOS\nYou must download it manually!")
+                # Delete and re-download
+                self.log.info("Chrome and Chromedriver version mismatch! Chrome: {0} Chromedriver: {1}".format(v[start:end], self.properties.version["CDV"]))
+                os.remove(os.path.normpath(os.getcwd() + "/chromedriver.exe"))
+                if '.' in v[start:start + 3]:
+                    self.properties.version["CDV"] = v[start:start + 2]
+                else:
+                    self.properties.version["CDV"] = v[start:start + 3]
+                self.properties.saveVersion()
+
+        if sys.platform == "win32":
+            self.log.info("Starting chromdriver downloader for {0}".format(sys.platform))
+            self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
+        else:
+            self.log.info("Unable to automatically download chromedriver for {0}".format(sys.platform))
+            self.alarm("WARNING", "You do not have the chromedriver in the main directory of the script\nAutomatic download is not supported for Linux/MacOS\nYou must download it manually!")
 
     def linkPopUp(self, title: str, label: str) -> None:
         """Create a pop-up widget used to copy informations"""

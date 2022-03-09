@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -143,6 +144,17 @@ class Preferences():
             self.widget.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.generalData["theme"] + ".css"), "r").read())
         
         self.widget.close()
+
+    def saveVersion(self) -> None:
+        """Serialize version and dump it into version.json"""
+        value = { 
+            "version" : "1.0.0",
+            "CDV" : "00"
+            }
+        value["version"] = self.version["version"]
+        value["CDV"] = self.version["CDV"]
+        with open("version.json", "w") as f:
+            json.dump(value, f)
 
     def serialize(self, module, v: "dict[str, dict]") -> None:
         """Serialize m.data into a dict"""
