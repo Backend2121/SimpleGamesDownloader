@@ -30,7 +30,7 @@ class About(QWindow):
         self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
 
         # Labels
-        self.titleLabel = QLabel("SGD")
+        self.titleLabel = QLabel("Simple Games Downloader")
         self.versionLabel = QLabel("Version: " + self.version["version"])
         self.descriptionLabel = QLabel("Modules update!")
         
