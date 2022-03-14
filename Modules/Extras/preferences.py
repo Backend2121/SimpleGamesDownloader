@@ -49,7 +49,7 @@ class Preferences():
         self.folder = QTabWidget()
 
         # Icon of widget
-        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # General close button
         self.ok = QPushButton("Close")

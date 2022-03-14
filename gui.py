@@ -88,7 +88,7 @@ class App():
         message.setWindowTitle(title)
         message.setText(label)
         # Icon of widget
-        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -114,7 +114,7 @@ class App():
         message.setWindowTitle(title)
         message.setText(label)
         # Icon of widget
-        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -153,7 +153,7 @@ class App():
         # layout.addWidget(self.percent, 1, 1)
 
         # Icon of widget
-        self.CDDialog.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.CDDialog.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         self.CDDialog.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -227,7 +227,7 @@ class App():
         self.message = QMessageBox()
         self.message.setWindowTitle(title)
         self.message.setText(label)
-        self.message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         self.message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -535,7 +535,7 @@ class App():
         self.widget.setWindowTitle("SGD")
 
         # Icon of main widget
-        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Default size of GUI
         self.widget.resize(int(self.properties.generalData["Width"]), int(self.properties.generalData["Height"]))

@@ -27,7 +27,7 @@ class About(QWindow):
         self.widget.resize(600,200)
         self.widget.setWindowTitle("About")
         # Icon of widget
-        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Labels
         self.titleLabel = QLabel("Simple Games Downloader")
