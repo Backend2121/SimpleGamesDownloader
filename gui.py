@@ -319,7 +319,6 @@ class App():
         # Dynamic import of modules (inside 'modules' folder)
         for f in os.listdir(os.path.normpath(os.getcwd() + "/Modules")):
             if (".py" in f):
-                print(f)
                 # Only add module to the modules array if module's setting 'Enable module' is true
                 f = f.replace(".py", "")
                 imported = importlib.import_module("." + f, "Modules")
@@ -336,6 +335,11 @@ class App():
         self.pending = len(modules)
         self.downloadCounter = -1
         self.linksListWidget.clear()
+        # Clear "GameIcons" folder
+        for f in os.listdir(os.path.normpath(os.getcwd() + "/GameIcons/")):
+            if "default.png" not in f:
+                os.remove(os.path.normpath(os.getcwd() + "/GameIcons/{0}".format(f)))
+
         # Repeat this for each module
         for module in modules:
             # Clear any previous garbage

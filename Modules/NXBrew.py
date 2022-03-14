@@ -24,8 +24,8 @@ proxy = "https://hide.me/it/proxy"
 # Chrome headless and silent options
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-chrome_options.add_argument("--headless")
-chrome_options.add_argument('log-level=1')
+#chrome_options.add_argument("--headless")
+chrome_options.add_argument('log-level=3')
 
 class Settings():
     """SGD Settings"""
@@ -231,10 +231,8 @@ class module():
         try:
             self.browser.close()
             self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            #self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
         except:
             self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            #self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
 
         # Clear cookies
         self.browser.delete_all_cookies()
