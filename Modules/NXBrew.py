@@ -2,6 +2,7 @@
 
 import os
 import json
+import time
 from typing import Tuple
 import logging
 
@@ -24,7 +25,7 @@ proxy = "https://hide.me/it/proxy"
 # Chrome headless and silent options
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-#chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument('log-level=3')
 
 class Settings():
@@ -230,9 +231,11 @@ class module():
         # Reset Chromedriver
         try:
             self.browser.close()
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
         except:
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
 
         # Clear cookies
         self.browser.delete_all_cookies()
@@ -289,7 +292,11 @@ class module():
 
     def listLinks(self, link: str) -> Tuple[list, list]:
         """Get download links"""
-        self.browser.get(link)
+        try:
+            self.browser.get(link)
+        except: 
+            time.sleep(1)
+            self.browser.get(link)
         downloadLinks = self.scrape(self.browser.page_source)
 
         return downloadLinks
