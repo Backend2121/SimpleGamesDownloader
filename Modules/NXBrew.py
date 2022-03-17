@@ -27,6 +27,7 @@ chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 chrome_options.add_argument("--headless")
 chrome_options.add_argument('log-level=3')
+chrome_options.add_argument('user-agent=Generic')
 
 class Settings():
     """SGD Settings"""
@@ -160,12 +161,21 @@ class module():
 
         self.log.info("INITIALIZED {0}".format(self.name))
 
-    def Proxy(self, input: WebElement, URL: str) -> None:
+    def Proxy(self, input: WebElement, URL: str, call: bool) -> None:
         """Navigate hide.me website"""
         input.click()
         input.clear()
         input.send_keys(URL)
-        input.submit()
+        settings = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/button')
+        settings.click()
+        self.browser.find_element_by_xpath("/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/div/ul/li[2]/label/input").click()
+        try:
+            input.submit()
+        except:
+            self.log.warning("Weird long error, ignoring")
+            if call:
+                return self.scrape(self.browser.page_source)
+                
 
     def cleanLink(self, userInput: str) -> str:
         """Final step: Unpoison download link"""
@@ -208,7 +218,7 @@ class module():
         self.downloadLabels = []
         self.result = [],[]
         # result[0] = Download name result[1] = Download name + link
-        #Step by step garbage cleaning of html page with BS4
+        # Step by step garbage cleaning of html page with BS4
         soup = BeautifulSoup(htmlPage, 'html.parser')
         for bigDiv in soup.find_all("div", class_="wp-block-columns has-2-columns"):
             for div in bigDiv.find_all("div", class_="wp-block-column"):
@@ -245,7 +255,7 @@ class module():
         url = "https://nxbrew.com/search/{0}/".format(toSearch)
         self.log.info("Searching in: {0}".format(url))
         # Proxy tunnel the request
-        self.Proxy(inputBox, url)
+        self.Proxy(inputBox, url, False)
 
     def listIcons(self) -> Tuple[list, list]:
         """"Get all icons links"""
@@ -290,14 +300,21 @@ class module():
 
         return infos
 
+    def buildLink(self, link: str) -> str:
+        # Find https: as starting point and & as the ending point, replace everything else correctly
+        start = link.find("https%3A")
+        end = link.find("&")
+        link = link[start:end]
+        link = link.replace("%3A", ":")
+        link = link.replace("%2F", "/")
+        return link
+
     def listLinks(self, link: str) -> Tuple[list, list]:
         """Get download links"""
-        try:
-            self.browser.get(link)
-        except: 
-            time.sleep(1)
-            self.browser.get(link)
-        downloadLinks = self.scrape(self.browser.page_source)
+        # Reset proxy connection
+        self.browser.get(proxy)
+        inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
+        downloadLinks = self.Proxy(inputBox, self.buildLink(link), True)
 
         return downloadLinks
 
