@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import webbrowser
+import requests
 import json
 import os
 
@@ -33,6 +34,7 @@ class About(QWindow):
         self.titleLabel = QLabel("Simple Games Downloader")
         self.versionLabel = QLabel("Version: " + self.version["version"])
         self.descriptionLabel = QLabel("Modules update!")
+        self.downloadCounter = QLabel(self.fetchDownloads())
         
         # PushButtons
         self.discordButton = QPushButton(" Discord")
@@ -98,6 +100,7 @@ class About(QWindow):
         self.mainLayout.addWidget(self.titleLabel)
         self.mainLayout.addWidget(self.versionLabel)
         self.mainLayout.addWidget(self.descriptionLabel)
+        self.mainLayout.addWidget(self.downloadCounter)
         self.mainLayout.addWidget(self.discordButton)
         self.mainLayout.addWidget(self.redditButton)
         self.mainLayout.addWidget(self.patreonButton)
@@ -130,3 +133,15 @@ class About(QWindow):
     
     def openBrowserYoutube(self):
         webbrowser.open("https://www.youtube.com/channel/UCW2JQJs_R3O_I937yxicT9A")
+
+    def fetchDownloads(self):
+        # Using GitHub api to fetch downloads infos
+        r = requests.get("https://api.github.com/repos/backend2121/SwitchGamesDownloader/releases")
+
+        res = [i for i in range(len(r.text)) if r.text.startswith("download_count", i)]
+        tot = 0
+
+        for x in res:
+            n = int((r.text[x:r.text.find(",", x)]).replace('download_count":', ""))
+            tot = tot + n
+        return "Total downloads: {0}".format(tot)
