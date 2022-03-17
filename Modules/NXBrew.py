@@ -171,11 +171,12 @@ class module():
         self.browser.find_element_by_xpath("/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/div/ul/li[2]/label/input").click()
         try:
             input.submit()
+            if call:
+                return self.scrape(self.browser.page_source)
         except:
             self.log.warning("Weird long error, ignoring")
             if call:
                 return self.scrape(self.browser.page_source)
-                
 
     def cleanLink(self, userInput: str) -> str:
         """Final step: Unpoison download link"""
@@ -241,17 +242,18 @@ class module():
         # Reset Chromedriver
         try:
             self.browser.close()
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
         except:
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
 
         # Clear cookies
         self.browser.delete_all_cookies()
         # Tunnel with Proxy
         self.browser.get(proxy)
         inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
+        self.browser.delete_all_cookies()
         url = "https://nxbrew.com/search/{0}/".format(toSearch)
         self.log.info("Searching in: {0}".format(url))
         # Proxy tunnel the request
