@@ -2,6 +2,7 @@
 
 import os
 import json
+import time
 from typing import Tuple
 import logging
 
@@ -25,7 +26,8 @@ proxy = "https://hide.me/it/proxy"
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 chrome_options.add_argument("--headless")
-chrome_options.add_argument('log-level=1')
+chrome_options.add_argument('log-level=3')
+chrome_options.add_argument('user-agent=Generic')
 
 class Settings():
     """SGD Settings"""
@@ -41,7 +43,8 @@ class Settings():
                 self.data = {
                     "isEnabled": 1,
                     "semiAutoMode": 0,
-                    "adBlock": 1
+                    "adBlock": 0,
+                    "useProxy": 1
                 }
         # Widget
         self.widget = QWidget()
@@ -62,25 +65,30 @@ class Settings():
         self.semiAuto = QCheckBox("Semi-auto mode")
         self.adBlocker = QCheckBox("AdBlocker")
         self.enableThis = QCheckBox("Enable module")
+        self.useProxy = QCheckBox("Use Proxy")
 
         # Assign to layout
         self.tickBoxes.addWidget(self.enableThis, 0, 0)
         self.tickBoxes.addWidget(self.adBlocker, 1, 0)
         self.tickBoxes.addWidget(self.semiAuto, 2, 0)
+        self.tickBoxes.addWidget(self.useProxy, 3, 0)
 
         # Self-apply config.json
         self.semiAuto.setChecked(bool(self.data["semiAutoMode"]))
         self.adBlocker.setChecked(bool(self.data["adBlock"]))
         self.enableThis.setChecked(bool(self.data["isEnabled"]))
+        self.useProxy.setChecked(bool(self.data["useProxy"]))
 
         # Set tooltips 
         self.semiAuto.setToolTip("ON: The user will be asked to solve the Captcha, once solved the script will continue on it's own<br>OFF: The program will only reach the Captcha page, you will need to continue on your own")
         self.adBlocker.setToolTip("ON: Disables intrusive ads ONLY in Captcha page<br>OFF: Renders ALL the ads in the Captcha page<br>Personal Note: Leave this unchecked as ads supports the website's owner(s)")
+        self.useProxy.setToolTip("ON: Use hide.me as proxy to access NXBrew.com in blocked regions<br>OFF: Bypass hide.me's proxy if you can access this website directly")
 
         # Define listeners
         self.semiAuto.stateChanged.connect(self.stateChange)
         self.adBlocker.stateChanged.connect(self.stateChange)
         self.enableThis.stateChanged.connect(self.stateChange)
+        self.useProxy.stateChanged.connect(self.stateChange)
 
     def stateChange(self):
         if self.semiAuto.isChecked(): self.data["semiAutoMode"] = 1
@@ -88,6 +96,9 @@ class Settings():
 
         if self.enableThis.isChecked(): self.data["isEnabled"] = 1
         else: self.data["isEnabled"] = 0
+
+        if self.useProxy.isChecked(): self.data["useProxy"] = 1
+        else: self.data["useProxy"] = 0
 
         if self.adBlocker.isChecked():
             self.data["adBlock"] = 1
@@ -150,12 +161,22 @@ class module():
 
         self.log.info("INITIALIZED {0}".format(self.name))
 
-    def Proxy(self, input: WebElement, URL: str) -> None:
+    def Proxy(self, input: WebElement, URL: str, call: bool) -> None:
         """Navigate hide.me website"""
         input.click()
         input.clear()
         input.send_keys(URL)
-        input.submit()
+        settings = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/button')
+        settings.click()
+        self.browser.find_element_by_xpath("/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/div/ul/li[2]/label/input").click()
+        try:
+            input.submit()
+            if call:
+                return self.scrape(self.browser.page_source)
+        except:
+            self.log.warning("Weird long error, ignoring")
+            if call:
+                return self.scrape(self.browser.page_source)
 
     def cleanLink(self, userInput: str) -> str:
         """Final step: Unpoison download link"""
@@ -198,7 +219,7 @@ class module():
         self.downloadLabels = []
         self.result = [],[]
         # result[0] = Download name result[1] = Download name + link
-        #Step by step garbage cleaning of html page with BS4
+        # Step by step garbage cleaning of html page with BS4
         soup = BeautifulSoup(htmlPage, 'html.parser')
         for bigDiv in soup.find_all("div", class_="wp-block-columns has-2-columns"):
             for div in bigDiv.find_all("div", class_="wp-block-column"):
@@ -222,20 +243,21 @@ class module():
         try:
             self.browser.close()
             self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            #self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
         except:
             self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            #self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
 
         # Clear cookies
         self.browser.delete_all_cookies()
         # Tunnel with Proxy
         self.browser.get(proxy)
         inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
+        self.browser.delete_all_cookies()
         url = "https://nxbrew.com/search/{0}/".format(toSearch)
         self.log.info("Searching in: {0}".format(url))
         # Proxy tunnel the request
-        self.Proxy(inputBox, url)
+        self.Proxy(inputBox, url, False)
 
     def listIcons(self) -> Tuple[list, list]:
         """"Get all icons links"""
@@ -280,10 +302,21 @@ class module():
 
         return infos
 
+    def buildLink(self, link: str) -> str:
+        # Find https: as starting point and & as the ending point, replace everything else correctly
+        start = link.find("https%3A")
+        end = link.find("&")
+        link = link[start:end]
+        link = link.replace("%3A", ":")
+        link = link.replace("%2F", "/")
+        return link
+
     def listLinks(self, link: str) -> Tuple[list, list]:
         """Get download links"""
-        self.browser.get(link)
-        downloadLinks = self.scrape(self.browser.page_source)
+        # Reset proxy connection
+        self.browser.get(proxy)
+        inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
+        downloadLinks = self.Proxy(inputBox, self.buildLink(link), True)
 
         return downloadLinks
 

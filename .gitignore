@@ -1,5 +1,6 @@
 GameIcons/*
 chromedriver.exe
+chromedriver
 config.json
 Modules/adblock.crx
 Modules/__pycache__

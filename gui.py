@@ -61,7 +61,7 @@ class App():
                     self.modulesSettings.append(imported.Settings())
 
             self.log.info("Loaded {0} module(s)".format(self.modulesSettings))
-            self.properties = Preferences(self.modulesSettings)
+            self.properties = Preferences(self.modulesSettings, self.log, self.logPath)
             self.createLayout()
             self.setWindowParameters()
             self.createWidgets()
@@ -88,7 +88,7 @@ class App():
         message.setWindowTitle(title)
         message.setText(label)
         # Icon of widget
-        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -114,7 +114,7 @@ class App():
         message.setWindowTitle(title)
         message.setText(label)
         # Icon of widget
-        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -153,7 +153,7 @@ class App():
         # layout.addWidget(self.percent, 1, 1)
 
         # Icon of widget
-        self.CDDialog.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.CDDialog.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         self.CDDialog.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -170,7 +170,7 @@ class App():
 
         # Start window
         self.CDDialog.exec_()
-    
+
     def updatePBar(self, value: int) -> None:
         """Update progress bar using the value passed in (0-100)"""
         self.pbar.setValue(value)
@@ -192,17 +192,33 @@ class App():
             pass
         else:
             self.updateAvailable("Update found", "A new version of this software is available on GitHub!")
-    
+
     def checkChromeDriver(self) -> None:
         if os.path.isfile("chromedriver.exe"):
-            return
-        else:
-            if sys.platform == "win32":
-                self.log.info("Starting chromdriver downloader for {0}".format(sys.platform))
-                self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
+            # Check currently installed version and copare it to the one saved in the config.json
+            v = os.popen('reg query "HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon" /v version').read()
+            v = v.replace(" ", "")
+            start = v.find("REG_SZ")
+            v = v.replace("REG_SZ", "")
+            end = v.rfind(".")
+            if self.properties.version["CDV"] in v[start:end]:
+                return
             else:
-                self.log.info("Unable to automatically download chromedriver for {0}".format(sys.platform))
-                self.alarm("WARNING", "You do not have the chromedriver in the main directory of the script\nAutomatic download is not supported for Linux/MacOS\nYou must download it manually!")
+                # Delete and re-download
+                self.log.info("Chrome and Chromedriver version mismatch! Chrome: {0} Chromedriver: {1}".format(v[start:end], self.properties.version["CDV"]))
+                os.remove(os.path.normpath(os.getcwd() + "/chromedriver.exe"))
+                if '.' in v[start:start + 3]:
+                    self.properties.version["CDV"] = v[start:start + 2]
+                else:
+                    self.properties.version["CDV"] = v[start:start + 3]
+                self.properties.saveVersion()
+
+        if sys.platform == "win32":
+            self.log.info("Starting chromdriver downloader for {0}".format(sys.platform))
+            self.chromeDriverNotFound("ChromeDriver not found!", "Do you want to download the ChromeDriver?")
+        else:
+            self.log.info("Unable to automatically download chromedriver for {0}".format(sys.platform))
+            self.alarm("WARNING", "You do not have the chromedriver in the main directory of the script\nAutomatic download is not supported for Linux/MacOS\nYou must download it manually!")
 
     def linkPopUp(self, title: str, label: str) -> None:
         """Create a pop-up widget used to copy informations"""
@@ -211,6 +227,7 @@ class App():
         self.message = QMessageBox()
         self.message.setWindowTitle(title)
         self.message.setText(label)
+        self.message.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Set style
         self.message.setStyleSheet(open(os.path.normpath(os.getcwd() + "/Themes/" + self.properties.generalData["theme"] + ".css"), "r").read())
@@ -220,18 +237,18 @@ class App():
         browser = QPushButton('Open')
 
         # Button for the auto download (grayed by default)
-        download = QPushButton('Download(WIP)')
-        download.setEnabled(False)
+        #download = QPushButton('Download(WIP)')
+        #download.setEnabled(False)
 
         # Assign buttons to QMessageBox
         self.message.addButton(copy, QMessageBox.YesRole)
         self.message.addButton(browser, QMessageBox.YesRole)
-        self.message.addButton(download, QMessageBox.YesRole)
+        #self.message.addButton(download, QMessageBox.YesRole)
 
         # Listeners
         copy.clicked.connect(self.copy)
         browser.clicked.connect(self.browser)
-        download.clicked.connect(self.downloadManager)
+        #download.clicked.connect(self.downloadManager)
 
         # Reset output box
         self.resultBox.setText(self.greetings())
@@ -239,16 +256,19 @@ class App():
 
         # Execute
         self.message.exec_()
+
 # REGION LinkPopUp buttons functions
     def copy(self) -> None:
         """Copy shown link"""
         cb = QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
         cb.setText(self.message.text(), mode=cb.Clipboard)
+        webbrowser.open("https://www.patreon.com/Backend2121")
 
     def browser(self) -> None:
         """Open shown link in a browser"""
         self.log.info("Opening browser to {0}".format(self.message.text()))
+        webbrowser.open("https://www.patreon.com/Backend2121")
         webbrowser.open(self.message.text())
 
     def downloadManager(self) -> None:
@@ -299,7 +319,6 @@ class App():
         # Dynamic import of modules (inside 'modules' folder)
         for f in os.listdir(os.path.normpath(os.getcwd() + "/Modules")):
             if (".py" in f):
-                print(f)
                 # Only add module to the modules array if module's setting 'Enable module' is true
                 f = f.replace(".py", "")
                 imported = importlib.import_module("." + f, "Modules")
@@ -307,6 +326,7 @@ class App():
                     if s.name == f:
                         if s.enableThis.isChecked():
                             modules.append(imported.module())
+
         self.listSearchWorkers = []
         self.listGamesWorkers = []
         self.listIconsWorkers = []
@@ -315,6 +335,11 @@ class App():
         self.pending = len(modules)
         self.downloadCounter = -1
         self.linksListWidget.clear()
+        # Clear "GameIcons" folder
+        for f in os.listdir(os.path.normpath(os.getcwd() + "/GameIcons/")):
+            if "default.png" not in f:
+                os.remove(os.path.normpath(os.getcwd() + "/GameIcons/{0}".format(f)))
+
         # Repeat this for each module
         for module in modules:
             # Clear any previous garbage
@@ -375,14 +400,13 @@ class App():
             self.resultBox.setText("Finalized search with " + str(len(self.done)) + "/" + str(self.pending) + "module(s)")
             return False
         else:
-            self.resultBox.setText("Finalized search with all mudles!")
+            self.resultBox.setText("Finalized search with all modules!")
             return True
 
     def createList(self, value):
         """SEARCH PHASE 4 Lists all the titles (+ icons) on the left and resets the state of the GUI"""
         self.str_titles = []
         self.str_links = []
-        # Add condition to disable this function
         if self.properties.generalData["loadicons"] == 1:
             self.log.info("Executing PHASE 4 with: {0} module".format(value[1].name))
             self.icons = value[0][0]
@@ -420,7 +444,7 @@ class App():
 
         # Make resume
         if self.properties.generalData["loadicons"] == 1:
-            # Throws and out of bounds error when re-searching after selecting a game (no effects notable)
+            # Throws and out of bounds error when re-searching after selecting a game
             self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/_" + self.done[self.str_links[self.listWidget.currentRow()][1]].name +  "_" + str(self.listWidget.currentRow()) + ".png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))
         else:
             self.resumeIcon.setPixmap(QPixmap(os.path.normpath(os.getcwd() + "/GameIcons/default.png")).scaled(self.properties.generalData["GameIconSizePx"] * 2,self.properties.generalData["GameIconSizePx"] * 2, Qt.KeepAspectRatio))            
@@ -428,6 +452,7 @@ class App():
         self.resumeLabel.setFont(QFont("Arial", self.properties.generalData["resumefont"]))
         self.resumeLayout.addWidget(self.resumeIcon)
         self.resumeLayout.addWidget(self.resumeLabel)
+        
         self.log.info("USER selected {0}".format(self.str_titles[self.listWidget.currentRow()]))
 
         # Save the tuple element returned from listLinks
@@ -514,7 +539,7 @@ class App():
         self.widget.setWindowTitle("SGD")
 
         # Icon of main widget
-        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Switch.png")))
+        self.widget.setWindowIcon(QIcon(os.path.normpath(os.getcwd() + "/Icons/Icon.png")))
 
         # Default size of GUI
         self.widget.resize(int(self.properties.generalData["Width"]), int(self.properties.generalData["Height"]))
