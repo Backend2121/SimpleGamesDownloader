@@ -3,9 +3,9 @@
 
 ---
 
-This software is a GUI able to use so called 'modules' to automatically scrape websites and provide you with a link without the hassle of having to fight against all the ads or things like that
+This software is a GUI able to use so called 'modules' to automatically scrape websites and provide you with a link without the hassle of having to fight against all the ads or things like that.
 
-If you want to learn how to build your own module for a website of your choice head to the "development" branch of this repo
+If you want to learn how to build your own module for a website of your choice head to the "development" branch of this repo.
 
 ---
 
