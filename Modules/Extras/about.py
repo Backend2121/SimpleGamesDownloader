@@ -136,7 +136,7 @@ class About(QWindow):
 
     def fetchDownloads(self):
         # Using GitHub api to fetch downloads infos
-        r = requests.get("https://api.github.com/repos/backend2121/SwitchGamesDownloader/releases")
+        r = requests.get("https://api.github.com/repos/backend2121/SimpleGamesDownloader/releases")
 
         res = [i for i in range(len(r.text)) if r.text.startswith("download_count", i)]
         tot = 0
