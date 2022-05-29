@@ -1,10 +1,13 @@
 import os
+import requests
 import logging
 import importlib
 import time
 import webbrowser
 import random
 import sys
+
+from requests import request
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -182,15 +185,17 @@ class App():
             self.CDDialog.close()# ENDREGION
     def openGithub(self) -> None:
         """Open latest release on GitHub"""
-        webbrowser.open("https://github.com/Backend2121/SwitchGamesDownloader/releases/latest")
+        webbrowser.open("https://github.com/Backend2121/SimpleGamesDownloader/releases/latest")
 
     def checkUpdates(self) -> None:
-        version = os.popen("curl https://github.com/Backend2121/SwitchGamesDownloader/releases/latest").read()
+        version = requests.get("https://github.com/Backend2121/SimpleGamesDownloader/releases/latest").url
+        #version = os.popen("curl https://github.com/Backend2121/SimpleGamesDownloader/releases/latest").read()
         urlStart = version.find("/tag/")
-        urlEnd = version.find('">')
-        if version[urlStart+5:urlEnd] == self.properties.version["version"]:
+        if version[urlStart+5:] == self.properties.version["version"]:
             pass
         else:
+            #print("Github Version: " + str(version))
+            #print("Local Version: " + str(self.properties.version["version"]))
             self.updateAvailable("Update found", "A new version of this software is available on GitHub!")
 
     def checkChromeDriver(self) -> None:
