@@ -161,16 +161,23 @@ class module():
 
         self.log.info("INITIALIZED {0}".format(self.name))
 
-    def Proxy(self, input: WebElement, URL: str, call: bool) -> None:
+    def Proxy(self, URL: str, call: bool) -> None:
         """Navigate hide.me website"""
-        input.click()
-        input.clear()
-        input.send_keys(URL)
+        # Tunnel with Proxy
+        self.browser.get(proxy)
+        inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
+        self.browser.delete_all_cookies()
+        
+        inputBox.click()
+        inputBox.clear()
+        inputBox.send_keys(URL)
+        # Disable url encryption
         settings = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/button')
         settings.click()
         self.browser.find_element_by_xpath("/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[2]/div[2]/div/ul/li[2]/label/input").click()
         try:
-            input.submit()
+            inputBox.submit()
+            # Redirected to NxBrew.com
             if call:
                 return self.scrape(self.browser.page_source)
         except:
@@ -180,16 +187,22 @@ class module():
 
     def cleanLink(self, userInput: str) -> str:
         """Final step: Unpoison download link"""
+        print("User Input: " + userInput)
         # User error checking
         if "/go.php" not in userInput:
-            return
-
+            start = userInput.find("http")
+            if start == -1:
+                return
+            return userInput[start:]
         # Link skippin'
-        userInput = userInput[userInput.find("/go.php"):]
-        self.browser.get("https://nl.hideproxy.me" + userInput)
-        downloadLink = self.browser.find_element_by_xpath("/html/body/header/div/div/div/div[1]/a").get_attribute("href")
-        self.browser.get(downloadLink)
-        unpoisonedLink = self.browser.find_element_by_xpath('/html/body/div[1]/form/div/input').get_attribute("value")
+        if self.preferences.data["useProxy"] == 1:
+            userInput = userInput[userInput.find("/go.php"):]
+            self.browser.get("https://nl.hideproxy.me" + userInput)
+            downloadLink = self.browser.find_element_by_xpath("/html/body/header/div/div/div/div[1]/a").get_attribute("href")
+            self.browser.get(downloadLink)
+            unpoisonedLink = self.browser.find_element_by_xpath('/html/body/div[1]/form/div/input').get_attribute("value")
+        else:
+            unpoisonedLink = userInput
         # Semi automatic mode check
         if self.preferences.data["semiAutoMode"] == 1:
             self.b = manualCaptcha.browser()
@@ -238,26 +251,28 @@ class module():
         return self.result
 
     def searchGame(self, toSearch: str) -> None:
-        """First step: Reach nxbrew with proxy"""
+        """First step: Reach nxbrew with proxy if useProxy is eneabled"""
         # Reset Chromedriver
         try:
             self.browser.close()
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
         except:
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
+            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
 
         # Clear cookies
         self.browser.delete_all_cookies()
-        # Tunnel with Proxy
-        self.browser.get(proxy)
-        inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
-        self.browser.delete_all_cookies()
+        
         url = "https://nxbrew.com/search/{0}/".format(toSearch)
         self.log.info("Searching in: {0}".format(url))
         # Proxy tunnel the request
-        self.Proxy(inputBox, url, False)
+        if self.preferences.data["useProxy"] == 1:
+            self.Proxy(url, False)
+        else:
+            # Access NxBrew.com directly without hide.me
+            self.browser.get(url)
+            self.scrape(self.browser.page_source)
 
     def listIcons(self) -> Tuple[list, list]:
         """"Get all icons links"""
@@ -313,10 +328,12 @@ class module():
 
     def listLinks(self, link: str) -> Tuple[list, list]:
         """Get download links"""
-        # Reset proxy connection
-        self.browser.get(proxy)
-        inputBox = self.browser.find_element_by_xpath('/html/body/main/div[2]/div[1]/div/div[2]/div/form/fieldset/div[1]/input')
-        downloadLinks = self.Proxy(inputBox, self.buildLink(link), True)
+        # Reset proxy connection if useProxy is enabled
+        if self.preferences.data["useProxy"] == 1:
+            downloadLinks = self.Proxy(self.buildLink(link), True)
+        else:
+            self.browser.get(link)
+            downloadLinks = self.scrape(self.browser.page_source)
 
         return downloadLinks
 
