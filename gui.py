@@ -1,13 +1,10 @@
 import os
-import requests
 import logging
 import importlib
 import time
 import webbrowser
 import random
 import sys
-
-from requests import request
 
 # Check if pip exists if not install
 if (os.system("pip -V") != 0):
@@ -17,6 +14,8 @@ if (os.system("pip -V") != 0):
 
 # Install all pre-requisites
 os.system("pip install -r requirements.txt")
+
+import requests
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
