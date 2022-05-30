@@ -2,7 +2,7 @@
 
 import os
 import json
-import time
+import sys
 from typing import Tuple
 import logging
 
@@ -154,8 +154,10 @@ class module():
         logging.basicConfig(filename=self.preferences.logPath , filemode='a', format='%(levelname)s - %(name)s - "%(asctime)s": %(message)s', level="INFO")
 
         try:
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
+            if sys.platform == "win32":
+                self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            else:
+                self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + "/chromedriver")
         except:
             self.log.fatal("NO WEBDRIVER FOUND EXITING!")
 
@@ -255,11 +257,15 @@ class module():
         # Reset Chromedriver
         try:
             self.browser.close()
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
+            if sys.platform == "win32":
+                self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            else:
+                self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
         except:
-            #self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
-            self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
+            if sys.platform == "win32":
+                self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver.exe", chrome_options=chrome_options)
+            else:
+                self.browser = webdriver.Chrome(executable_path=os.getcwd() + "//chromedriver", chrome_options=chrome_options)
 
         # Clear cookies
         self.browser.delete_all_cookies()

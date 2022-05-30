@@ -1,5 +1,6 @@
 # TO BE USED ONLY TO DOWNLOAD LEGALLY BOUGHT GAMES
 
+import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -80,10 +81,14 @@ class module:
         self.options.add_argument("--headless")
         self.options.add_argument('log-level=1')
 
-        # Linux chromedriver assignment
-        #self.browser = Chrome(chrome_options=self.options, executable_path=os.getcwd() + "/chromedriver")
+        
         # Windows chromedriver assignment
-        self.browser = Chrome(chrome_options=self.options, executable_path=os.getcwd() + "/chromedriver.exe")
+        if sys.platform == "win32":
+            self.browser = Chrome(chrome_options=self.options, executable_path=os.getcwd() + "/chromedriver.exe")
+        # Linux chromedriver assignment
+        else:
+            self.browser = Chrome(chrome_options=self.options, executable_path=os.getcwd() + "/chromedriver")
+        
 
         # Base link to website
         self.link = 'https://hexrom.com/roms/nintendo-3ds/?title='
