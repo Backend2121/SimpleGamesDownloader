@@ -10,7 +10,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 
 import time
 import os
@@ -152,10 +151,10 @@ class module:
         titlesLinks = [],[]
         self.browser.get(self.link + self.toSearch + '&genre=&region=')
         gridElement = self.browser.find_element_by_xpath("/html/body/div[3]/div[1]/div/div[1]/div/div")
-        for element in gridElement.find_elements_by_css_selector("div"):
-            if element.get_attribute('title'):
-                titlesLinks[0].append(element.get_attribute('title'))
-                titlesLinks[1].append(element.get_attribute('href'))
+        for element in gridElement.find_elements_by_css_selector("li"):
+            if element.find_element_by_css_selector("a").get_attribute('title'):
+                titlesLinks[0].append(element.find_element_by_css_selector("a").get_attribute('title'))
+                titlesLinks[1].append(element.find_element_by_css_selector("a").get_attribute('href'))
 
         return titlesLinks
 
@@ -164,11 +163,14 @@ class module:
         
         Instantiated in SEARCH PHASE 3 of gui.py"""
         gridElement = self.browser.find_element_by_xpath("/html/body/div[3]/div[1]/div/div[1]/div/div")
-        for game in gridElement.find_elements_by_css_selector("div"):
-            if game.get_attribute("class") == "thumbnail icon-post":
-                img = game.find_element_by_css_selector("img")
-                self.gamesicons.append(img.get_attribute('src'))
-                self.sizes.append((int(img.get_attribute('naturalHeight')),int(img.get_attribute('naturalWidth'))))
+        for game in gridElement.find_elements_by_css_selector("li"):
+            # Dig to find image
+            game = game.find_element_by_css_selector("div")
+            game = game.find_element_by_css_selector("div")
+            game = game.find_element_by_css_selector("div")
+            img = game.find_element_by_css_selector("img")
+            self.gamesicons.append(img.get_attribute('src'))
+            self.sizes.append((int(img.get_attribute('naturalHeight')),int(img.get_attribute('naturalWidth'))))
         return (self.gamesicons, self.sizes)
 
     def download(self, link: str) -> None:

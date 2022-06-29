@@ -182,7 +182,7 @@ class module:
         """
         titlesLinks = [],[]
         self.browser.get(self.link + self.toSearch + '&sort=download')
-        gridContainer = self.browser.find_element_by_xpath("/html/body/div[2]/div/div/section/div[2]/div[5]/ul")
+        gridContainer = self.browser.find_element_by_xpath("/html/body/div/div/div/section[1]/div[2]/div[5]/ul")
         # Contains all information about a game: title, link and icon
         games = gridContainer.find_elements_by_tag_name("li")
         for x in games:
