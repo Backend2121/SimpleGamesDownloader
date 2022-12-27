@@ -1,4 +1,6 @@
 # SwitchGamesDownloader
+# This software is no longer maintained, please use STP.
+https://github.com/Backend2121/SimpleThingsProvider
 ## Only for Windows
 
 ---
