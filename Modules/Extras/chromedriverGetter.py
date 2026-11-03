@@ -50,7 +50,12 @@ class worker(QThread):
         # Extract and delete ChromeDriver.zip
         try:
             with zipfile.ZipFile("ChromeDriver.zip", 'r') as zip_ref:
-                zip_ref.extractall(str(os.getcwd()))
+                target = os.path.abspath(os.getcwd())
+                for member in zip_ref.namelist():
+                    member_path = os.path.abspath(os.path.join(target, member))
+                    if os.path.commonpath([target, member_path]) != target:
+                        raise ValueError(f"Unsafe path in archive: {member}")
+                    zip_ref.extract(member, str(os.getcwd()))
                 self.log.info("Extraction of ChromeDriver.zip complete")
         except Exception as e:
             self.log.info("An error occurred during the extraction of ChromeDriver.exe: {0}", e)
